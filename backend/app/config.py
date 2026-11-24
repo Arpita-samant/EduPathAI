@@ -1,16 +1,21 @@
 import os
 from pydantic_settings import BaseSettings
 
+def get_db_url() -> str:
+    raw = os.getenv("DATABASE_URL", "").strip()
+    if raw.startswith("postgres://"):
+        return raw.replace("postgres://", "postgresql://", 1)
+    if raw:
+        return raw
+    return "sqlite:////tmp/edupath.db" if os.getenv("VERCEL") else "sqlite:///./edupath.db"
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "EduPath AI"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     
     # Database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "sqlite:////tmp/edupath.db" if os.getenv("VERCEL") else "sqlite:///./edupath.db"
-    )
+    DATABASE_URL: str = get_db_url()
     
     # Auth
     JWT_SECRET: str = os.getenv("JWT_SECRET", "edupath-jwt-secure-secret-key-32chars-min-length-2026")
