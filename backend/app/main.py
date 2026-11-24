@@ -65,6 +65,15 @@ def root():
         "docs_url": "/docs"
     }
 
+@app.get("/api")
+def api_root():
+    return {
+        "app": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "status": "online",
+        "docs_url": "/api/docs"
+    }
+
 @app.get("/api/health")
 def health():
     return {"status": "healthy", "service": "edupath-ai-backend"}
