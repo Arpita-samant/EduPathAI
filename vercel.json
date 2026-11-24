@@ -8,17 +8,18 @@
       "excludeFiles": "{frontend/**,node_modules/**,*.db}"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api(/.*)?",
-      "dest": "api/index.py"
+      "source": "/api",
+      "destination": "/api/index.py"
     },
     {
-      "handle": "filesystem"
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
     }
   ]
 }
