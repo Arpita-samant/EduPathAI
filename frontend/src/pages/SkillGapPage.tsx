@@ -91,8 +91,8 @@ export const SkillGapPage: React.FC<SkillGapPageProps> = ({
         </div>
 
         {/* Role Selector & Overall Readiness */}
-        <div className="flex items-center gap-4">
-          <div className="text-right">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full md:w-auto">
+          <div className="text-left sm:text-right">
             <span className="text-[10px] font-normal uppercase tracking-wider text-[#6F7782] block mb-0.5">
               Role Readiness
             </span>
@@ -107,7 +107,7 @@ export const SkillGapPage: React.FC<SkillGapPageProps> = ({
           <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
-            className="px-4 py-2.5 rounded-2xl border border-[#E4E5E9] text-xs font-normal bg-white text-[#17191C] outline-none shadow-soft"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-2xl border border-[#E4E5E9] text-xs font-normal bg-white text-[#17191C] outline-none shadow-soft"
           >
             <option value="default">Default Target Career</option>
             <option value="Full-Stack Software Engineering">Full-Stack SWE</option>

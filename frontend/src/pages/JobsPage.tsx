@@ -176,8 +176,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
         </div>
 
         {/* Filters & Search Toolbar */}
-        <div className="mt-4 flex flex-col md:flex-row gap-3">
-          <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+        <div className="mt-4 flex flex-col sm:flex-row flex-wrap gap-3">
+          <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[220px] relative">
             <Search className="w-4 h-4 text-[#6F7782]/60 absolute left-3.5 top-3" />
             <input
               type="text"
@@ -188,29 +188,31 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
             />
           </form>
 
-          <select
-            value={domainFilter}
-            onChange={(e) => setDomainFilter(e.target.value)}
-            className="px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
-          >
-            <option value="">All Domains</option>
-            <option value="Software">Software Engineering</option>
-            <option value="AI">AI / Machine Learning</option>
-            <option value="Data">Data Science</option>
-            <option value="Cloud">Cloud & DevOps</option>
-          </select>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <select
+              value={domainFilter}
+              onChange={(e) => setDomainFilter(e.target.value)}
+              className="flex-1 sm:flex-none px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
+            >
+              <option value="">All Domains</option>
+              <option value="Software">Software Engineering</option>
+              <option value="AI">AI / Machine Learning</option>
+              <option value="Data">Data Science</option>
+              <option value="Cloud">Cloud & DevOps</option>
+            </select>
 
-          <select
-            value={roleTypeFilter}
-            onChange={(e) => setRoleTypeFilter(e.target.value)}
-            className="px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
-          >
-            <option value="">All Role Types</option>
-            <option value="Full-Time">Full-Time</option>
-            <option value="Remote">Remote</option>
-            <option value="Contract">Contract</option>
-            <option value="Internship">Internship</option>
-          </select>
+            <select
+              value={roleTypeFilter}
+              onChange={(e) => setRoleTypeFilter(e.target.value)}
+              className="flex-1 sm:flex-none px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
+            >
+              <option value="">All Role Types</option>
+              <option value="Full-Time">Full-Time</option>
+              <option value="Remote">Remote</option>
+              <option value="Contract">Contract</option>
+              <option value="Internship">Internship</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -444,7 +446,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                   </a>
                 )}
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     onClick={() => handleRunSkillGap(selectedJob)}
                     className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-normal bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition cursor-pointer"

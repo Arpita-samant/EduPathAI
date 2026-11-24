@@ -41,12 +41,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
           <div className="text-center max-w-3xl mx-auto">
             {/* Pill Banner with mini AI Orb */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-normal bg-white/90 text-[#193D50] border border-[#E4E5E9] mb-8 shadow-soft">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-normal bg-white/90 text-[#193D50] border border-[#E4E5E9] mb-6 sm:mb-8 shadow-soft max-w-full">
               <AiOrb size="sm" pulse={true} />
-              <span>Minimalist AI Workspace for Career Acceleration</span>
+              <span className="truncate">Minimalist AI Workspace for Career Acceleration</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-light text-[#17191C] tracking-tight leading-[1.15]">
+            <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-light text-[#17191C] tracking-tight leading-[1.15]">
               Move from Career Confusion to{' '}
               <span className="font-normal text-[#193D50] underline decoration-[#C7B5D9]/70 decoration-2 underline-offset-4">
                 Career Readiness
@@ -54,16 +54,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
               .
             </h1>
 
-            <p className="mt-6 text-base sm:text-lg text-[#6F7782] leading-relaxed font-normal max-w-2xl mx-auto">
+            <p className="mt-5 sm:mt-6 text-sm sm:text-lg text-[#6F7782] leading-relaxed font-normal max-w-2xl mx-auto">
               Multi-stage AI assessments, explainable career matching, adaptive learning roadmaps,
               and live real-time job matching—engineered to verify competence and close skill gaps.
             </p>
 
             {/* CTAs */}
-            <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+            <div className="mt-8 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5 w-full">
               <button
                 onClick={handleDemoClick}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition shadow-soft cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition shadow-soft cursor-pointer"
               >
                 <span>Build My Career Roadmap</span>
                 <ArrowRight className="w-4 h-4" />
@@ -71,7 +71,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
 
               <button
                 onClick={handleDemoClick}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-sm font-medium text-[#193D50] bg-white hover:bg-[#F9F9FB] border border-[#E4E5E9] hover:border-[#C7B5D9]/60 transition shadow-soft cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium text-[#193D50] bg-white hover:bg-[#F9F9FB] border border-[#E4E5E9] hover:border-[#C7B5D9]/60 transition shadow-soft cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-[#536C8A]" />
                 <span>Explore Demo Workspace</span>
@@ -79,7 +79,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             </div>
 
             {/* Trust Badges */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-7 text-xs text-[#6F7782] font-normal">
+            <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-7 text-xs text-[#6F7782] font-normal">
               <span className="inline-flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#536C8A]" />
                 Zero Black-Box Scoring
@@ -90,19 +90,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-[#536C8A]" />
-                Live Jobicy, Arbeitnow, Himalayas & Adzuna Feed
+                Live 4-API Feed
               </span>
             </div>
           </div>
 
           {/* AI Core Interactive Hero Orb (Ball) Centerpiece */}
-          <div className="mt-16 relative flex flex-col items-center justify-center">
+          <div className="mt-12 sm:mt-16 relative flex flex-col items-center justify-center">
             {/* Ambient Multi-layered Glow Auras */}
-            <div className="absolute w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-[#C7B5D9]/30 via-[#A8B9D0]/25 to-[#F4D7E6]/25 rounded-full blur-3xl pointer-events-none animate-pulse-soft" />
-            <div className="absolute w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] bg-gradient-to-br from-[#536C8A]/15 to-[#C7B5D9]/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute w-[280px] h-[280px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-[#C7B5D9]/30 via-[#A8B9D0]/25 to-[#F4D7E6]/25 rounded-full blur-3xl pointer-events-none animate-pulse-soft" />
+            <div className="absolute w-[180px] h-[180px] sm:w-[320px] sm:h-[320px] bg-gradient-to-br from-[#536C8A]/15 to-[#C7B5D9]/20 rounded-full blur-2xl pointer-events-none" />
 
             {/* Orbiting / Surrounding Floating AI Capability Badges */}
-            <div className="relative z-10 flex flex-col items-center">
+            <div className="relative z-10 flex flex-col items-center w-full">
               {/* Top pill above ball */}
               <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-[#E4E5E9] shadow-soft text-[11px] text-[#6F7782] font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -113,8 +113,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
               <div className="relative group cursor-pointer" onClick={handleDemoClick}>
                 <AiOrb size="hero" pulse={true} glow={true} className="transition-transform duration-700 group-hover:scale-105" />
                 
-                {/* Floating subtle metric cards on left and right for desktop */}
-                <div className="hidden md:flex absolute top-1/2 -left-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
+                {/* Floating subtle metric cards on left and right for desktop only */}
+                <div className="hidden lg:flex absolute top-1/2 -left-36 xl:-left-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
                   <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
                     <span className="w-2 h-2 rounded-full bg-[#536C8A]" />
                     <span className="font-medium">Verified Fit</span>
@@ -126,7 +126,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
                   </div>
                 </div>
 
-                <div className="hidden md:flex absolute top-1/2 -right-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
+                <div className="hidden lg:flex absolute top-1/2 -right-36 xl:-right-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
                   <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span className="font-medium">Adaptive Roadmap</span>
@@ -140,8 +140,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
                 </div>
               </div>
 
+              {/* Mobile / Tablet 2x2 Metric Cards Grid */}
+              <div className="grid grid-cols-2 lg:hidden gap-2 sm:gap-3 mt-5 max-w-sm sm:max-w-md w-full px-2">
+                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                  <span className="font-medium">Verified Fit</span>
+                  <span className="font-mono text-[10px] text-[#536C8A] bg-[#EAEFF5] px-1.5 py-0.5 rounded">94%</span>
+                </div>
+                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                  <span className="font-medium">Single Path</span>
+                  <span className="w-2 h-2 rounded-full bg-[#C7B5D9]" />
+                </div>
+                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                  <span className="font-medium">Roadmap</span>
+                  <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
+                </div>
+                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                  <span className="font-medium">Live Feed</span>
+                  <span className="font-mono text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">70+ Roles</span>
+                </div>
+              </div>
+
               {/* Bottom Interactive Prompt under the Ball */}
-              <div className="mt-6 flex flex-col items-center">
+              <div className="mt-5 sm:mt-6 flex flex-col items-center">
                 <button
                   onClick={handleDemoClick}
                   className="inline-flex items-center gap-2 text-xs text-[#536C8A] hover:text-[#193D50] font-medium transition-colors"
@@ -171,9 +191,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Step 1 */}
-            <div className="p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
+            <div className="p-5 sm:p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
               <div className="font-mono text-2xl font-light text-[#536C8A] mb-3">01</div>
               <h3 className="text-[16px] font-normal text-[#17191C] mb-1.5">
                 Smart Profile
@@ -184,7 +204,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             </div>
 
             {/* Step 2 */}
-            <div className="p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
+            <div className="p-5 sm:p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
               <div className="font-mono text-2xl font-light text-[#C7B5D9] mb-3">02</div>
               <h3 className="text-[16px] font-normal text-[#17191C] mb-1.5">
                 Skill Assessment
@@ -195,7 +215,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             </div>
 
             {/* Step 3 */}
-            <div className="p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
+            <div className="p-5 sm:p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
               <div className="font-mono text-2xl font-light text-[#A8B9D0] mb-3">03</div>
               <h3 className="text-[16px] font-normal text-[#17191C] mb-1.5">
                 AI Career Match & Chat
@@ -206,7 +226,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             </div>
 
             {/* Step 4 */}
-            <div className="p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
+            <div className="p-5 sm:p-6 rounded-[22px] border border-[#E4E5E9] bg-[#F9F9FB] shadow-soft">
               <div className="font-mono text-2xl font-light text-[#193D50] mb-3">04</div>
               <h3 className="text-[16px] font-normal text-[#17191C] mb-1.5">
                 Adaptive Roadmap
@@ -220,9 +240,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
       </section>
 
       {/* Comparison Table */}
-      <section id="comparison" className="py-20 bg-[#F9F9FB] border-b border-[#E4E5E9]/70">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
+      <section id="comparison" className="py-16 sm:py-20 bg-[#F9F9FB] border-b border-[#E4E5E9]/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
             <span className="text-xs font-medium uppercase tracking-wider text-[#536C8A]">
               Clear Differentiation
             </span>
@@ -232,69 +252,71 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
           </div>
 
           <div className="bg-white rounded-[24px] border border-[#E4E5E9] shadow-soft overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#F9F9FB] border-b border-[#E4E5E9] text-[11px] font-medium uppercase text-[#6F7782]">
-                <tr>
-                  <th className="py-4 px-6 font-medium">Capability</th>
-                  <th className="py-4 px-6 font-medium text-[#6F7782]">Traditional Portals</th>
-                  <th className="py-4 px-6 font-medium text-[#193D50] bg-[#C7B5D9]/10">EduPath AI</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E4E5E9]/60 text-xs text-[#17191C]">
-                <tr>
-                  <td className="py-4 px-6 font-medium">Skill Evaluation</td>
-                  <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
-                    <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
-                    Self-reported checkboxes
-                  </td>
-                  <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
-                    <span className="flex items-center gap-1.5 text-[#536C8A]">
-                      <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
-                      Multi-dimensional evaluation & single superpower selection
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-6 font-medium">Career Selection</td>
-                  <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
-                    <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
-                    Confusing list of 20 generic roles
-                  </td>
-                  <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
-                    <span className="flex items-center gap-1.5 text-[#536C8A]">
-                      <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
-                      Single best-fit career match + conversational AI advisor
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-6 font-medium">Roadmap Access</td>
-                  <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
-                    <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
-                    Static, generic PDFs
-                  </td>
-                  <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
-                    <span className="flex items-center gap-1.5 text-[#536C8A]">
-                      <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
-                      Strictly unlocked only when optimal career is matched
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-6 font-medium">Real-Time Opportunities</td>
-                  <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
-                    <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
-                    Stale mock postings
-                  </td>
-                  <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
-                    <span className="flex items-center gap-1.5 text-[#536C8A]">
-                      <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
-                      Live aggregation from Jobicy, Arbeitnow, Himalayas & Adzuna
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="overflow-x-auto w-full">
+              <table className="w-full min-w-[560px] text-left text-sm">
+                <thead className="bg-[#F9F9FB] border-b border-[#E4E5E9] text-[11px] font-medium uppercase text-[#6F7782]">
+                  <tr>
+                    <th className="py-4 px-6 font-medium">Capability</th>
+                    <th className="py-4 px-6 font-medium text-[#6F7782]">Traditional Portals</th>
+                    <th className="py-4 px-6 font-medium text-[#193D50] bg-[#C7B5D9]/10">EduPath AI</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E4E5E9]/60 text-xs text-[#17191C]">
+                  <tr>
+                    <td className="py-4 px-6 font-medium">Skill Evaluation</td>
+                    <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
+                      <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
+                      Self-reported checkboxes
+                    </td>
+                    <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
+                      <span className="flex items-center gap-1.5 text-[#536C8A]">
+                        <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
+                        Multi-dimensional evaluation & single superpower selection
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-4 px-6 font-medium">Career Selection</td>
+                    <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
+                      <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
+                      Confusing list of 20 generic roles
+                    </td>
+                    <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
+                      <span className="flex items-center gap-1.5 text-[#536C8A]">
+                        <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
+                        Single best-fit career match + conversational AI advisor
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-4 px-6 font-medium">Roadmap Access</td>
+                    <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
+                      <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
+                      Static, generic PDFs
+                    </td>
+                    <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
+                      <span className="flex items-center gap-1.5 text-[#536C8A]">
+                        <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
+                        Strictly unlocked only when optimal career is matched
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-4 px-6 font-medium">Real-Time Opportunities</td>
+                    <td className="py-4 px-6 text-[#6F7782] flex items-center gap-1.5">
+                      <XCircle className="w-4 h-4 text-[#C84C4C] shrink-0" />
+                      Stale mock postings
+                    </td>
+                    <td className="py-4 px-6 font-medium bg-[#C7B5D9]/5">
+                      <span className="flex items-center gap-1.5 text-[#536C8A]">
+                        <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
+                        Live aggregation from Jobicy, Arbeitnow, Himalayas & Adzuna
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -373,13 +395,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
 
       {/* Minimal Footer */}
       <footer className="mt-auto py-7 bg-white border-t border-[#E4E5E9] text-xs text-[#6F7782]">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <AiOrb size="sm" pulse={false} />
             <span className="font-normal text-[#17191C]">EduPath AI</span>
             <span>— Minimal AI Career Workspace</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <a href="#how-it-works" className="hover:text-[#17191C] transition">
               Pipeline
             </a>

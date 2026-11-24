@@ -96,12 +96,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-7">
       {/* Welcome Banner Card */}
-      <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-soft">
-        <div className="flex items-start gap-4">
-          <AiOrb size="md" pulse={true} className="mt-1" />
+      <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-5 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-5 shadow-soft">
+        <div className="flex items-start gap-3.5 sm:gap-4">
+          <AiOrb size="md" pulse={true} className="mt-1 shrink-0" />
           <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-2xl sm:text-[26px] font-light text-[#17191C] tracking-tight">
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+              <h2 className="text-xl sm:text-[26px] font-light text-[#17191C] tracking-tight">
                 Welcome back, {user?.full_name || 'Explorer'}
               </h2>
               {user?.is_demo && (
@@ -110,7 +110,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#6F7782] mt-1 font-normal">
+            <p className="text-xs sm:text-sm text-[#6F7782] mt-1 font-normal">
               Target Career:{' '}
               <span className="text-[#17191C] font-medium">
                 {hasTargetCareer ? summary.target_career : 'Not Selected Yet'}
@@ -124,7 +124,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Next Action Step Card */}
-        <div className="bg-[#F9F9FB] border border-[#E4E5E9] hover:border-[#C7B5D9]/50 p-4 rounded-2xl flex items-center justify-between gap-4 max-w-md transition-all duration-200">
+        <div className="bg-[#F9F9FB] border border-[#E4E5E9] hover:border-[#C7B5D9]/50 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 w-full lg:max-w-md transition-all duration-200">
           <div className="min-w-0">
             <span className="text-[10px] font-medium uppercase tracking-wider text-[#536C8A] block mb-0.5">
               Suggested Next Step
@@ -138,7 +138,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
           <button
             onClick={() => onNavigate(summary.next_action_step.href)}
-            className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition shadow-soft cursor-pointer"
+            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition shadow-soft cursor-pointer"
           >
             <span>{summary.next_action_step.cta}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -147,9 +147,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </div>
 
       {/* Top Level KPIs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* KPI 1: Unified Career Readiness Ring Card */}
-        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-6 shadow-soft flex flex-col justify-between md:row-span-2">
+        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-5 sm:p-6 shadow-soft flex flex-col justify-between sm:col-span-2 lg:col-span-1 lg:row-span-2">
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-[#6F7782] uppercase tracking-wider">
@@ -274,7 +274,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Quick Shortcuts */}
-        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-5 shadow-soft md:col-span-2 flex flex-col justify-between">
+        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-5 shadow-soft sm:col-span-2 lg:col-span-2 flex flex-col justify-between">
           <span className="text-[11px] font-medium text-[#6F7782] uppercase tracking-wider block mb-2.5">
             Guidance Pipeline Shortcuts
           </span>

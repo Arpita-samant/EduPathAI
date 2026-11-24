@@ -285,19 +285,20 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
           </div>
 
           {/* Selected Single Skill Hero Banner */}
-          <div className="p-6 sm:p-7 rounded-[22px] bg-gradient-to-br from-[#F9F9FB] via-white to-[#C7B5D9]/10 border border-[#E4E5E9] flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden">
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="hidden sm:flex shrink-0">
-                <AiOrb size="xl" pulse={false} glow={true} />
+          <div className="p-5 sm:p-7 rounded-[22px] bg-gradient-to-br from-[#F9F9FB] via-white to-[#C7B5D9]/10 border border-[#E4E5E9] flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden">
+            <div className="flex items-center gap-3.5 sm:gap-4 relative z-10">
+              <div className="flex shrink-0">
+                <AiOrb size="md" pulse={false} glow={true} className="sm:hidden" />
+                <AiOrb size="xl" pulse={false} glow={true} className="hidden sm:block" />
               </div>
               <div>
                 <span className="text-[11px] font-normal text-[#536C8A] uppercase tracking-wider block mb-1">
                   Selected Best-Fit Core Skill
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-normal text-[#17191C]">
+                <h3 className="text-xl sm:text-3xl font-normal text-[#17191C]">
                   {analysisResult.selected_best_fit_skill}
                 </h3>
-                <p className="text-xs text-[#6F7782] mt-1.5 max-w-md font-light">
+                <p className="text-xs text-[#6F7782] mt-1 sm:mt-1.5 max-w-md font-light">
                   Domain Category: <strong className="text-[#17191C] font-normal">{analysisResult.skill_category}</strong>
                 </p>
               </div>
@@ -306,7 +307,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
             <div className="flex flex-col items-start sm:items-end shrink-0 relative z-10">
               <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-[#E4E5E9] shadow-soft">
                 <AiOrb size="xs" />
-                <span className="text-sm font-normal text-[#17191C] font-mono">
+                <span className="text-xs sm:text-sm font-normal text-[#17191C] font-mono">
                   {analysisResult.confidence_score}% Match Confidence
                 </span>
               </div>
@@ -366,13 +367,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
           )}
 
           {/* Next Step CTA */}
-          <div className="pt-5 border-t border-[#E4E5E9]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="pt-5 border-t border-[#E4E5E9]/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="text-xs text-[#6F7782] font-light">
               Your core superpower is verified. Next, let AI analyze and select your single best-fit career match.
             </div>
             <button
               onClick={() => onNavigate('/careers')}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer"
             >
               <span>Proceed to AI Career Match</span>
               <ArrowRight className="w-4 h-4" />

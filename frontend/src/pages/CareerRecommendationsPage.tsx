@@ -197,7 +197,7 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
             <button
               onClick={handleAnalyzeSkills}
               disabled={analyzing}
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft disabled:opacity-50 cursor-pointer"
             >
               {analyzing ? (
                 <>
@@ -219,21 +219,22 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
       {career && (
         <div className="space-y-6">
           {/* Hero Career Card */}
-          <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-6 sm:p-8 shadow-soft">
+          <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-5 sm:p-8 shadow-soft">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-6 border-b border-[#E4E5E9]/60">
-              <div className="flex items-start gap-4">
-                <div className="hidden sm:flex shrink-0">
-                  <AiOrb size="xl" pulse={true} glow={true} />
+              <div className="flex items-start gap-3.5 sm:gap-4">
+                <div className="flex shrink-0">
+                  <AiOrb size="md" pulse={true} glow={true} className="sm:hidden mt-0.5" />
+                  <AiOrb size="xl" pulse={true} glow={true} className="hidden sm:block" />
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-normal bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20 mb-2.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#536C8A]" />
                     <span>Single Best-Fit Career Path Selected</span>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-light text-[#17191C] tracking-tight">
+                  <h1 className="text-xl sm:text-3xl font-light text-[#17191C] tracking-tight">
                     {career.title}
                   </h1>
-                  <p className="text-sm text-[#6F7782] mt-1 font-light">{career.tagline}</p>
+                  <p className="text-xs sm:text-sm text-[#6F7782] mt-1 font-light">{career.tagline}</p>
                 </div>
               </div>
 
@@ -345,7 +346,7 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
 
               <button
                 onClick={handleUnlockRoadmap}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer"
               >
                 <span>Open Adaptive Roadmap</span>
                 <ArrowRight className="w-4 h-4" />

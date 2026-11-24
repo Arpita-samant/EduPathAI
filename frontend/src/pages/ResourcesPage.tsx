@@ -122,8 +122,8 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({ initialSkillFilter
         )}
 
         {/* Toolbar */}
-        <div className="mt-4 flex flex-col md:flex-row gap-3">
-          <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+        <div className="mt-4 flex flex-col sm:flex-row flex-wrap gap-3">
+          <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[220px] relative">
             <Search className="w-4 h-4 text-[#6F7782]/60 absolute left-3.5 top-3" />
             <input
               type="text"
@@ -134,29 +134,31 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({ initialSkillFilter
             />
           </form>
 
-          <select
-            value={resourceType}
-            onChange={(e) => setResourceType(e.target.value)}
-            className="px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
-          >
-            <option value="">All Resource Types</option>
-            <option value="Free Course">Free Courses</option>
-            <option value="Documentation">Official Documentation</option>
-            <option value="GitHub Repo">GitHub Repositories</option>
-            <option value="Tutorial">Tutorials</option>
-            <option value="Practice Platform">Practice Platforms</option>
-          </select>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <select
+              value={resourceType}
+              onChange={(e) => setResourceType(e.target.value)}
+              className="flex-1 sm:flex-none px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
+            >
+              <option value="">All Resource Types</option>
+              <option value="Free Course">Free Courses</option>
+              <option value="Documentation">Official Documentation</option>
+              <option value="GitHub Repo">GitHub Repositories</option>
+              <option value="Tutorial">Tutorials</option>
+              <option value="Practice Platform">Practice Platforms</option>
+            </select>
 
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-            className="px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
-          >
-            <option value="">All Difficulties</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-          </select>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="flex-1 sm:flex-none px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
+            >
+              <option value="">All Difficulties</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
         </div>
       </div>
 

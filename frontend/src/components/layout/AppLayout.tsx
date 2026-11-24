@@ -27,7 +27,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ currentRoute, onNavigate, 
           onNavigate={onNavigate}
         />
 
-        <main className="flex-1 max-w-6xl w-full mx-auto px-5 sm:px-10 py-7 sm:py-9">
+        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 lg:px-10 py-5 sm:py-8">
           {children}
         </main>
       </div>
