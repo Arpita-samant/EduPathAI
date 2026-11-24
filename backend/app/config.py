@@ -7,7 +7,10 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api"
     
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./edupath.db")
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL",
+        "sqlite:////tmp/edupath.db" if os.getenv("VERCEL") else "sqlite:///./edupath.db"
+    )
     
     # Auth
     JWT_SECRET: str = os.getenv("JWT_SECRET", "edupath-jwt-secure-secret-key-32chars-min-length-2026")
