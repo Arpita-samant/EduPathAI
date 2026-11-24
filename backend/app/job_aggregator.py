@@ -58,7 +58,7 @@ def fetch_jobicy() -> List[Dict[str, Any]]:
     url = "https://jobicy.com/api/v2/remote-jobs?count=25"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EduPathAI/1.0"}
     try:
-        r = requests.get(url, headers=headers, timeout=8)
+        r = requests.get(url, headers=headers, timeout=3)
         if r.status_code == 200:
             data = r.json().get("jobs", [])
             normalized = []
@@ -106,7 +106,7 @@ def fetch_arbeitnow() -> List[Dict[str, Any]]:
     url = "https://www.arbeitnow.com/api/job-board-api"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EduPathAI/1.0"}
     try:
-        r = requests.get(url, headers=headers, timeout=8)
+        r = requests.get(url, headers=headers, timeout=3)
         if r.status_code == 200:
             data = r.json().get("data", [])
             normalized = []
@@ -148,7 +148,7 @@ def fetch_himalayas() -> List[Dict[str, Any]]:
     url = "https://himalayas.app/jobs/api?limit=25"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EduPathAI/1.0"}
     try:
-        r = requests.get(url, headers=headers, timeout=8)
+        r = requests.get(url, headers=headers, timeout=3)
         if r.status_code == 200:
             data = r.json().get("jobs", [])
             normalized = []
@@ -334,7 +334,7 @@ def get_aggregated_live_jobs(
 
             # Jobicy
             try:
-                jobs_j = fut_jobicy.result(timeout=10)
+                jobs_j = fut_jobicy.result(timeout=3)
                 all_live.extend(jobs_j)
                 active_sources_status.append({
                     "name": "Jobicy",
@@ -347,7 +347,7 @@ def get_aggregated_live_jobs(
 
             # Arbeitnow
             try:
-                jobs_a = fut_arbeitnow.result(timeout=10)
+                jobs_a = fut_arbeitnow.result(timeout=3)
                 all_live.extend(jobs_a)
                 active_sources_status.append({
                     "name": "Arbeitnow",
@@ -360,7 +360,7 @@ def get_aggregated_live_jobs(
 
             # Himalayas
             try:
-                jobs_h = fut_himalayas.result(timeout=10)
+                jobs_h = fut_himalayas.result(timeout=3)
                 all_live.extend(jobs_h)
                 active_sources_status.append({
                     "name": "Himalayas",
@@ -373,7 +373,7 @@ def get_aggregated_live_jobs(
 
             # Adzuna
             try:
-                jobs_ad, ad_status = fut_adzuna.result(timeout=10)
+                jobs_ad, ad_status = fut_adzuna.result(timeout=3)
                 all_live.extend(jobs_ad)
                 active_sources_status.append({
                     "name": "Adzuna",
