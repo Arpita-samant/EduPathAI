@@ -247,7 +247,7 @@ class JobMatchItem(BaseModel):
     apply_url: str
     source: Optional[str] = "Jobicy"
     company_logo: Optional[str] = ""
-    posted_at: Optional[str] = ""
+    posted_at: Optional[Any] = ""
 
 class JobsListResponse(BaseModel):
     jobs: List[JobMatchItem]

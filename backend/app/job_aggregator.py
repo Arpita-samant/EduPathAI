@@ -94,7 +94,7 @@ def fetch_jobicy() -> List[Dict[str, Any]]:
                     "apply_url": j.get("url", "https://jobicy.com"),
                     "source": "Jobicy",
                     "company_logo": j.get("companyLogo", ""),
-                    "posted_at": j.get("pubDate", "")
+                    "posted_at": str(j.get("pubDate", "") or "")
                 })
             return normalized
     except Exception as e:
@@ -182,7 +182,7 @@ def fetch_himalayas() -> List[Dict[str, Any]]:
                     "apply_url": j.get("applicationLink") or f"https://himalayas.app/jobs/{j.get('companySlug', '')}",
                     "source": "Himalayas",
                     "company_logo": j.get("companyLogo", ""),
-                    "posted_at": j.get("pubDate", "")
+                    "posted_at": str(j.get("pubDate") or j.get("created_at") or "")
                 })
             return normalized
     except Exception as e:
@@ -288,7 +288,7 @@ def fetch_adzuna(app_id: Optional[str] = None, app_key: Optional[str] = None) ->
                     "apply_url": j.get("redirect_url", "https://www.adzuna.com"),
                     "source": "Adzuna",
                     "company_logo": "",
-                    "posted_at": j.get("created", "")
+                    "posted_at": str(j.get("created", "") or "")
                 })
             return normalized, f"Live Connected ({len(normalized)} jobs retrieved)"
         else:
