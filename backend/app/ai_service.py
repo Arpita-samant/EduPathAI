@@ -1,25 +1,42 @@
 import json
 import logging
 import re
+import requests
 from typing import Dict, Any, List, Optional
-import google.generativeai as genai
 from app.config import settings
 
 logger = logging.getLogger("ai_service")
 
-# Initialize Gemini if key exists
-if settings.GEMINI_API_KEY:
-    try:
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        logger.warning(f"Failed to configure Gemini API: {e}")
+class GeminiResponse:
+    def __init__(self, text: str):
+        self.text = text
+
+class GeminiModelWrapper:
+    def __init__(self, model_name: str, api_key: str):
+        self.model_name = model_name
+        self.api_key = api_key
+
+    def generate_content(self, prompt: str) -> GeminiResponse:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+        payload = {
+            "contents": [
+                {
+                    "parts": [{"text": prompt}]
+                }
+            ]
+        }
+        resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        return GeminiResponse(text)
 
 def get_gemini_model(model_name: str = "gemini-2.5-flash"):
     try:
         if settings.GEMINI_API_KEY:
-            return genai.GenerativeModel(model_name)
-    except Exception:
-        pass
+            return GeminiModelWrapper(model_name, settings.GEMINI_API_KEY)
+    except Exception as e:
+        logger.warning(f"Failed to initialize Gemini wrapper: {e}")
     return None
 
 def clean_json_response(raw_text: str) -> str:

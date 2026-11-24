@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWTError, jwt
+try:
+    import jwt
+    from jwt import PyJWTError as JWTError
+except ImportError:
+    from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -50,7 +54,7 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session 
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except JWTError:
+    except (JWTError, Exception):
         raise credentials_exception
 
     user = db.query(models.User).filter(models.User.id == user_id).first()

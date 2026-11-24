@@ -1,8 +1,9 @@
 import io
 import re
+import zipfile
+import xml.etree.ElementTree as ET
 from typing import Tuple
 from pypdf import PdfReader
-from docx import Document
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
     try:
@@ -18,14 +19,13 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
 
 def extract_text_from_docx(file_bytes: bytes) -> str:
     try:
-        doc = Document(io.BytesIO(file_bytes))
-        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-        for table in doc.tables:
-            for row in table.rows:
-                row_text = " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
-                if row_text:
-                    paragraphs.append(row_text)
-        return "\n".join(paragraphs).strip()
+        with io.BytesIO(file_bytes) as bio:
+            with zipfile.ZipFile(bio) as zf:
+                xml_content = zf.read("word/document.xml")
+                root = ET.fromstring(xml_content)
+                # WordprocessingML text nodes end with '}t'
+                texts = [node.text for node in root.iter() if node.tag.endswith("}t") and node.text]
+                return " ".join(texts).strip()
     except Exception as e:
         return f"Error extracting DOCX: {str(e)}"
 
