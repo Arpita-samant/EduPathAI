@@ -17,6 +17,17 @@ from app.routers import (
     dashboard_router
 )
 
+# Ensure DB schema and initial seeds exist eagerly for serverless environments (e.g. Vercel)
+try:
+    Base.metadata.create_all(bind=engine)
+    _init_db = SessionLocal()
+    try:
+        seed_database(_init_db)
+    finally:
+        _init_db.close()
+except Exception as _e:
+    print(f"Startup DB init check: {_e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize DB schema

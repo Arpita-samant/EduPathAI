@@ -43,10 +43,6 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session 
         headers={"WWW-Authenticate": "Bearer"},
     )
     if not token:
-        # Check if demo user can be auto-authenticated if requested
-        demo_user = db.query(models.User).filter(models.User.email == "demo@edupath.ai").first()
-        if demo_user:
-            return demo_user
         raise credentials_exception
 
     try:

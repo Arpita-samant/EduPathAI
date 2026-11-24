@@ -18,6 +18,7 @@ function AppContent() {
   const { user, isLoading } = useAuth();
   const [currentRoute, setCurrentRoute] = useState<string>('/');
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [selectedAssessmentDomain, setSelectedAssessmentDomain] = useState<string>('Full-Stack Software Engineering');
   const [selectedRoleForGap, setSelectedRoleForGap] = useState<string>('default');
   const [resourceSkillFilter, setResourceSkillFilter] = useState<string>('');
@@ -45,16 +46,20 @@ function AppContent() {
     );
   }
 
-  // If on landing page (or user not logged in and requesting landing page)
-  if (currentRoute === '/' && !user) {
+  // If user is not authenticated, display landing page with Auth modal capability
+  if (!user) {
     return (
       <>
         <LandingPage
           onNavigate={navigate}
-          onOpenAuthModal={() => setAuthModalOpen(true)}
+          onOpenAuthModal={(mode = 'signin') => {
+            setAuthModalMode(mode);
+            setAuthModalOpen(true);
+          }}
         />
         <AuthModal
           isOpen={authModalOpen}
+          initialMode={authModalMode}
           onClose={() => setAuthModalOpen(false)}
           onSuccess={() => navigate('/dashboard')}
         />
@@ -122,6 +127,7 @@ function AppContent() {
 
       <AuthModal
         isOpen={authModalOpen}
+        initialMode={authModalMode}
         onClose={() => setAuthModalOpen(false)}
         onSuccess={() => navigate('/dashboard')}
       />

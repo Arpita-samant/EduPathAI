@@ -7,16 +7,17 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=schemas.Token)
 def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
+    clean_email = str(user_in.email).strip().lower()
+    existing = db.query(models.User).filter(models.User.email == clean_email).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="An account with this email already exists."
+            detail="An account with this email already exists. Please switch to Sign In."
         )
     user = models.User(
-        email=user_in.email,
+        email=clean_email,
         password_hash=auth.get_password_hash(user_in.password),
-        full_name=user_in.full_name,
+        full_name=user_in.full_name.strip(),
         is_demo=False
     )
     db.add(user)
@@ -51,11 +52,17 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=schemas.Token)
 def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == user_in.email).first()
-    if not user or not auth.verify_password(user_in.password, user.password_hash):
+    clean_email = str(user_in.email).strip().lower()
+    user = db.query(models.User).filter(models.User.email == clean_email).first()
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password."
+            detail="No account found with this email. Please check your spelling or click 'Create Account' to sign up."
+        )
+    if not auth.verify_password(user_in.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password. Please verify your password or use the 1-Click Demo."
         )
     access_token = auth.create_access_token(data={"sub": user.id})
     return {

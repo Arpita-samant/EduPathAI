@@ -24,7 +24,13 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     let errorDetail = 'An unexpected error occurred';
     try {
       const errorJson = await response.json();
-      errorDetail = errorJson.detail || errorDetail;
+      if (typeof errorJson.detail === 'string') {
+        errorDetail = errorJson.detail;
+      } else if (Array.isArray(errorJson.detail)) {
+        errorDetail = errorJson.detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
+      } else if (errorJson.message) {
+        errorDetail = errorJson.message;
+      }
     } catch {
       errorDetail = response.statusText;
     }
