@@ -2,7 +2,7 @@ import React from 'react';
 import aiOrbImg from '../../assets/ai-orb.png';
 
 export interface AiOrbProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'hero';
   pulse?: boolean;
   glow?: boolean;
   className?: string;
@@ -24,6 +24,8 @@ export const AiOrb: React.FC<AiOrbProps> = ({
     xl: 'w-24 h-24',
     '2xl': 'w-32 h-32 sm:w-36 sm:h-36',
     '3xl': 'w-44 h-44 sm:w-52 sm:h-52',
+    '4xl': 'w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72',
+    hero: 'w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80',
   };
 
   const orbSize = sizeMap[size] || sizeMap.md;

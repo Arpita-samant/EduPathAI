@@ -95,117 +95,61 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             </div>
           </div>
 
-          {/* Interactive-Style Dashboard Preview Card */}
-          <div className="mt-16 max-w-5xl mx-auto">
-            <div className="rounded-[26px] border border-[#E4E5E9] bg-white shadow-card overflow-hidden">
-              {/* Browser Chrome Header */}
-              <div className="bg-[#F9F9FB] px-5 py-3.5 border-b border-[#E4E5E9] flex items-center justify-between text-xs text-[#6F7782]">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#E4E5E9]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#E4E5E9]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#E4E5E9]" />
-                  <span className="ml-3 font-mono text-[11px] text-[#6F7782]">
-                    workspace.edupath.ai/alex-chen
-                  </span>
+          {/* AI Core Interactive Hero Orb (Ball) Centerpiece */}
+          <div className="mt-16 relative flex flex-col items-center justify-center">
+            {/* Ambient Multi-layered Glow Auras */}
+            <div className="absolute w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-[#C7B5D9]/30 via-[#A8B9D0]/25 to-[#F4D7E6]/25 rounded-full blur-3xl pointer-events-none animate-pulse-soft" />
+            <div className="absolute w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] bg-gradient-to-br from-[#536C8A]/15 to-[#C7B5D9]/20 rounded-full blur-2xl pointer-events-none" />
+
+            {/* Orbiting / Surrounding Floating AI Capability Badges */}
+            <div className="relative z-10 flex flex-col items-center">
+              {/* Top pill above ball */}
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-[#E4E5E9] shadow-soft text-[11px] text-[#6F7782] font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Adaptive Career Intelligence Engine
+              </div>
+
+              {/* Central Glowing AI Ball (Orb) */}
+              <div className="relative group cursor-pointer" onClick={handleDemoClick}>
+                <AiOrb size="hero" pulse={true} glow={true} className="transition-transform duration-700 group-hover:scale-105" />
+                
+                {/* Floating subtle metric cards on left and right for desktop */}
+                <div className="hidden md:flex absolute top-1/2 -left-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
+                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                    <span className="w-2 h-2 rounded-full bg-[#536C8A]" />
+                    <span className="font-medium">Verified Fit</span>
+                    <span className="font-mono text-[11px] text-[#536C8A] bg-[#EAEFF5] px-1.5 py-0.5 rounded">94%</span>
+                  </div>
+                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                    <span className="w-2 h-2 rounded-full bg-[#C7B5D9]" />
+                    <span className="font-medium">Single Best Path</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#C7B5D9]/20 text-[#193D50] font-mono text-[11px] border border-[#C7B5D9]/30">
-                    Readiness: 88/100
-                  </span>
+
+                <div className="hidden md:flex absolute top-1/2 -right-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
+                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="font-medium">Adaptive Roadmap</span>
+                    <span className="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
+                  </div>
+                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="font-medium">4-API Live Stream</span>
+                    <span className="font-mono text-[11px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">70+ Roles</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Preview Body */}
-              <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6 bg-[#F9F9FB]/40">
-                {/* Card 1 */}
-                <div className="bg-white p-5 rounded-[22px] border border-[#E4E5E9] shadow-soft">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-medium uppercase text-[#6F7782] tracking-wider">
-                      Single Career Path
-                    </span>
-                    <span className="font-mono text-xs text-[#193D50] bg-[#EAEFF5] px-2 py-0.5 rounded-md border border-[#E4E5E9]">
-                      94% Match
-                    </span>
-                  </div>
-                  <h4 className="font-normal text-[#17191C] text-[17px]">Full-Stack Software Engineer</h4>
-                  <p className="text-xs text-[#6F7782] mt-1 mb-4 leading-relaxed">
-                    Based on verified core skill: Full-Stack Web Architecture.
-                  </p>
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[#6F7782]">Verified Competency</span>
-                        <span className="font-mono text-[#17191C]">92%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-[#F9F9FB] rounded-full overflow-hidden border border-[#E4E5E9]/50">
-                        <div className="h-full bg-[#536C8A] rounded-full" style={{ width: '92%' }} />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[#6F7782]">Interest Alignment</span>
-                        <span className="font-mono text-[#17191C]">96%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-[#F9F9FB] rounded-full overflow-hidden border border-[#E4E5E9]/50">
-                        <div className="h-full bg-[#C7B5D9] rounded-full" style={{ width: '96%' }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 2 */}
-                <div className="bg-white p-5 rounded-[22px] border border-[#E4E5E9] shadow-soft">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-medium uppercase text-[#6F7782] tracking-wider">
-                      Live Multi-API Stream
-                    </span>
-                    <span className="text-[11px] text-[#536C8A] font-medium">70+ Live Roles</span>
-                  </div>
-                  <div className="space-y-2 mt-2">
-                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E4E5E9]">
-                      <span className="text-[#17191C] font-normal truncate">Fandom • Accounting Assistant</span>
-                      <span className="text-[10px] text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">Jobicy</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E4E5E9]">
-                      <span className="text-[#17191C] font-normal truncate">Eventinc • AI Engineer</span>
-                      <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Arbeitnow</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E4E5E9]">
-                      <span className="text-[#17191C] font-normal truncate">Stryker • Staff Engineer</span>
-                      <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">Himalayas</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 3 */}
-                <div className="bg-white p-5 rounded-[22px] border border-[#E4E5E9] shadow-soft">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-medium uppercase text-[#6F7782] tracking-wider">
-                      Adaptive Roadmap
-                    </span>
-                    <span className="font-mono text-xs text-[#536C8A] bg-[#EAEFF5] px-2 py-0.5 rounded border border-[#E4E5E9]">
-                      Week 2 / 8
-                    </span>
-                  </div>
-                  <h5 className="font-normal text-[#17191C] text-[15px]">
-                    React 18 Architecture & State
-                  </h5>
-                  <p className="text-xs text-[#6F7782] mt-1 leading-relaxed">
-                    Milestone: Accessible keyboard Data Grid with custom hooks.
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-[#E4E5E9]/60 flex items-center justify-between text-xs">
-                    <span className="text-[#536C8A] font-medium flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Week 1 Completed
-                    </span>
-                    <button
-                      onClick={handleDemoClick}
-                      className="text-[#536C8A] hover:text-[#193D50] font-medium cursor-pointer"
-                    >
-                      View Roadmap →
-                    </button>
-                  </div>
-                </div>
+              {/* Bottom Interactive Prompt under the Ball */}
+              <div className="mt-6 flex flex-col items-center">
+                <button
+                  onClick={handleDemoClick}
+                  className="inline-flex items-center gap-2 text-xs text-[#536C8A] hover:text-[#193D50] font-medium transition-colors"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#C7B5D9]" />
+                  <span>Click to interact with EduPath AI Core</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
