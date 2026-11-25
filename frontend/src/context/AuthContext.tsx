@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { api } from '../api/client';
+import { syncVaultToBackend, saveUserVault } from '../utils/dataVault';
 
 interface AuthContextType {
   user: User | null;
@@ -58,8 +59,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (localStorage.getItem('edupath_token')) {
         const me = await api.getMe();
         setUser(me);
+        // Silently ensure vault is synced to backend
+        syncVaultToBackend(me.email).catch(() => {});
       }
     } catch {
+      // If serverless container recycled /tmp database, recover seamlessly from local account vault
+      const accounts = getSavedAccounts();
+      const accountKeys = Object.keys(accounts);
+      if (accountKeys.length > 0) {
+        // Pick the most recently active account
+        const sorted = accountKeys
+          .map(k => accounts[k])
+          .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+        const latestAcc = sorted[0];
+
+        if (latestAcc && latestAcc.email && latestAcc.password) {
+          try {
+            console.info(`[AuthContext] Auto-restoring session for ${latestAcc.email} after container cold-start...`);
+            let regRes;
+            try {
+              regRes = await api.login({ email: latestAcc.email, password: latestAcc.password });
+            } catch {
+              regRes = await api.register({
+                email: latestAcc.email,
+                password: latestAcc.password,
+                full_name: latestAcc.fullName || 'Explorer'
+              });
+            }
+            localStorage.setItem('edupath_token', regRes.access_token);
+            setToken(regRes.access_token);
+            setUser(regRes.user);
+            await syncVaultToBackend(latestAcc.email);
+            return;
+          } catch (autoErr) {
+            console.warn('[AuthContext] Session auto-restoration failed:', autoErr);
+          }
+        }
+      }
+
       localStorage.removeItem('edupath_token');
       setToken(null);
       setUser(null);
@@ -82,6 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(res.access_token);
       setUser(res.user);
       saveLocalAccount(cleanEmail, cleanPass, res.user.full_name || 'Explorer');
+      saveUserVault(cleanEmail, { fullName: res.user.full_name });
+      // Restore any cached profile data to backend
+      await syncVaultToBackend(cleanEmail);
     } catch (err: any) {
       // If serverless container restarted or wiped /tmp DB, check local account cache to auto-restore
       const accounts = getSavedAccounts();
@@ -96,6 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem('edupath_token', regRes.access_token);
           setToken(regRes.access_token);
           setUser(regRes.user);
+          saveUserVault(cleanEmail, { fullName: localAcc.fullName });
+          await syncVaultToBackend(cleanEmail);
           return;
         } catch (autoRegErr) {
           console.warn('Auto-restore failed:', autoRegErr);
@@ -115,6 +157,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(res.access_token);
     setUser(res.user);
     saveLocalAccount(cleanEmail, cleanPass, cleanName);
+    saveUserVault(cleanEmail, { fullName: cleanName });
+    await syncVaultToBackend(cleanEmail);
   };
 
   const loginDemo = async () => {

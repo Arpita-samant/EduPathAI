@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { SingleCareerRecommendation } from '../types';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { saveUserVault, getUserVault } from '../utils/dataVault';
 import { AiOrb } from '../components/common/AiOrb';
 
 interface CareerRecommendationsPageProps {
@@ -30,6 +32,7 @@ interface ChatMessage {
 }
 
 export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
   const [career, setCareer] = useState<SingleCareerRecommendation | null>(null);
   const [bestFitSkill, setBestFitSkill] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,6 +57,23 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
       if (res.has_analyzed && res.career) {
         setCareer(res.career);
         initializeChat(res.career);
+        if (user?.email) {
+          saveUserVault(user.email, { target_career: res.career.title });
+        }
+      } else if (user?.email) {
+        const vault = getUserVault(user.email);
+        if (vault?.target_career) {
+          try {
+            await api.selectCareer(vault.target_career);
+            const retryRes = await api.getCareerStatus();
+            if (retryRes.has_analyzed && retryRes.career) {
+              setCareer(retryRes.career);
+              initializeChat(retryRes.career);
+            }
+          } catch {
+            // non-fatal
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching career status:', err);
@@ -64,7 +84,7 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
 
   useEffect(() => {
     fetchStatus();
-  }, []);
+  }, [user?.email]);
 
   const initializeChat = (targetCareer: SingleCareerRecommendation) => {
     setMessages([
@@ -81,6 +101,9 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
       const result = await api.analyzeBestCareer();
       setCareer(result);
       initializeChat(result);
+      if (user?.email && result.title) {
+        saveUserVault(user.email, { target_career: result.title });
+      }
     } catch (err) {
       console.error('Error analyzing career:', err);
     } finally {

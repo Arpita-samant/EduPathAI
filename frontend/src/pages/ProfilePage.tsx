@@ -10,13 +10,26 @@ import {
   AlertCircle,
   ExternalLink,
   Award,
-  GitBranch
+  GitBranch,
+  Shield,
+  Download,
+  UploadCloud
 } from 'lucide-react';
 import { StudentProfile, TechnicalSkill, ProjectItem, CertificationItem } from '../types';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import {
+  getUserVault,
+  saveUserVault,
+  isProfileNonEmpty,
+  syncVaultToBackend,
+  exportVaultJson,
+  importVaultJson
+} from '../utils/dataVault';
 import { AiOrb } from '../components/common/AiOrb';
 
 export const ProfilePage: React.FC = () => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,6 +37,7 @@ export const ProfilePage: React.FC = () => {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   // Form states
   const [educationLevel, setEducationLevel] = useState('Undergraduate');
@@ -43,24 +57,59 @@ export const ProfilePage: React.FC = () => {
   const [softSkills, setSoftSkills] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
 
+  const applyProfileToState = (data: Partial<StudentProfile>) => {
+    if (data.education_level !== undefined) setEducationLevel(data.education_level || 'Undergraduate');
+    if (data.degree !== undefined) setDegree(data.degree || '');
+    if (data.major !== undefined) setMajor(data.major || '');
+    if (data.graduation_year !== undefined) setGradYear(data.graduation_year || 2026);
+    if (data.gpa !== undefined) setGpa(data.gpa || 3.8);
+    if (data.career_goals !== undefined) setCareerGoals(data.career_goals || '');
+    if (data.target_career !== undefined) setTargetCareer(data.target_career || '');
+    if (data.technical_skills !== undefined) setSkills(data.technical_skills || []);
+    if (data.projects !== undefined) setProjects(data.projects || []);
+    if (data.certifications !== undefined) setCertifications(data.certifications || []);
+    if (data.soft_skills !== undefined) setSoftSkills(data.soft_skills || []);
+    if (data.interests !== undefined) setInterests(data.interests || []);
+  };
+
   const fetchProfile = async () => {
     setLoading(true);
     try {
       const data = await api.getProfile();
+
+      // Check if backend database was cold-started/empty but client vault has user data
+      if (user?.email) {
+        const vault = getUserVault(user.email);
+        if (vault?.profile && isProfileNonEmpty(vault.profile) && !isProfileNonEmpty(data)) {
+          console.info('[ProfilePage] Backend profile was empty; restoring from client vault...');
+          await syncVaultToBackend(user.email);
+          const restored = await api.getProfile();
+          setProfile(restored);
+          applyProfileToState(restored);
+          setMessage({ text: 'Profile automatically restored from your secure data vault.', type: 'success' });
+          setLoading(false);
+          return;
+        }
+      }
+
       setProfile(data);
-      setEducationLevel(data.education_level || 'Undergraduate');
-      setDegree(data.degree || '');
-      setMajor(data.major || '');
-      setGradYear(data.graduation_year || 2026);
-      setGpa(data.gpa || 3.8);
-      setCareerGoals(data.career_goals || '');
-      setTargetCareer(data.target_career || '');
-      setSkills(data.technical_skills || []);
-      setProjects(data.projects || []);
-      setCertifications(data.certifications || []);
-      setSoftSkills(data.soft_skills || []);
-      setInterests(data.interests || []);
+      applyProfileToState(data);
+
+      // Keep vault in sync with newest backend data
+      if (user?.email && isProfileNonEmpty(data)) {
+        saveUserVault(user.email, { profile: data, target_career: data.target_career });
+      }
     } catch (err: any) {
+      // Offline / ephemeral error fallback
+      if (user?.email) {
+        const vault = getUserVault(user.email);
+        if (vault?.profile && isProfileNonEmpty(vault.profile)) {
+          applyProfileToState(vault.profile);
+          setMessage({ text: 'Loaded profile from your local secure vault.', type: 'success' });
+          setLoading(false);
+          return;
+        }
+      }
       setMessage({ text: err.message || 'Failed to load profile', type: 'error' });
     } finally {
       setLoading(false);
@@ -69,31 +118,48 @@ export const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [user?.email]);
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSaving(true);
     setMessage(null);
-    try {
-      const updated = await api.updateProfile({
-        education_level: educationLevel,
-        degree,
-        major,
-        graduation_year: Number(gradYear),
-        gpa: Number(gpa),
-        technical_skills: skills,
-        soft_skills: softSkills,
-        certifications,
-        projects,
-        interests,
-        career_goals: careerGoals,
+
+    const payload = {
+      education_level: educationLevel,
+      degree,
+      major,
+      graduation_year: Number(gradYear),
+      gpa: Number(gpa),
+      technical_skills: skills,
+      soft_skills: softSkills,
+      certifications,
+      projects,
+      interests,
+      career_goals: careerGoals,
+      target_career: targetCareer
+    };
+
+    // Save to local secure vault first (client guarantee)
+    if (user?.email) {
+      saveUserVault(user.email, {
+        profile: payload as any,
         target_career: targetCareer
       });
+    }
+
+    try {
+      const updated = await api.updateProfile(payload);
       setProfile(updated);
-      setMessage({ text: 'Profile saved successfully! Completeness updated.', type: 'success' });
+      if (user?.email) {
+        saveUserVault(user.email, {
+          profile: updated,
+          target_career: updated.target_career
+        });
+      }
+      setMessage({ text: 'Profile saved & backed up! Protected across all future sessions.', type: 'success' });
     } catch (err: any) {
-      setMessage({ text: err.message || 'Error saving profile', type: 'error' });
+      setMessage({ text: 'Saved to local vault! Sync will complete when server is ready: ' + err.message, type: 'success' });
     } finally {
       setSaving(false);
     }
@@ -121,6 +187,24 @@ export const ProfilePage: React.FC = () => {
       if (ext.projects) setProjects(ext.projects);
       if (ext.interests) setInterests(ext.interests);
       if (ext.career_goals) setCareerGoals(ext.career_goals);
+
+      // Auto-save parsed profile to local vault
+      if (user?.email) {
+        saveUserVault(user.email, {
+          profile: {
+            degree: ext.degree || degree,
+            major: ext.major || major,
+            graduation_year: ext.graduation_year || gradYear,
+            gpa: ext.gpa || gpa,
+            technical_skills: ext.technical_skills || skills,
+            soft_skills: ext.soft_skills || softSkills,
+            certifications: ext.certifications || certifications,
+            projects: ext.projects || projects,
+            interests: ext.interests || interests,
+            career_goals: ext.career_goals || careerGoals
+          }
+        });
+      }
 
       setMessage({
         text: 'Resume parsed with structured extraction. Profile fields have been populated below.',
@@ -521,17 +605,94 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {/* Bottom Save Bar */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+          {/* Vault Security Indicator */}
+          <div className="flex items-center gap-2 text-xs text-[#536C8A]">
+            <Shield className="w-4 h-4 text-emerald-600" />
+            <span>Encrypted local vault active: Profile auto-restores across server reboots.</span>
+          </div>
+
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft disabled:opacity-40"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft disabled:opacity-40 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving Profile...' : 'Save Profile & Update Readiness'}</span>
+            <span>{saving ? 'Saving Profile...' : 'Save Profile & Protect Data'}</span>
           </button>
         </div>
       </form>
+
+      {/* Data Protection & Backup Toolkit Card */}
+      <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-6 shadow-soft">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-[#17191C]">Data Vault & Portable Backup</h4>
+              <p className="text-xs text-[#6F7782] mt-0.5">
+                Your profile is safely cached in your local device vault. You can also download a portable JSON copy or restore it anytime.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                if (!user?.email) return;
+                const jsonStr = exportVaultJson(user.email);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `careervector-profile-${user.email}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-[#193D50] bg-[#F9F9FB] hover:bg-[#EAEFF5] border border-[#E4E5E9] transition cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Backup</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-[#536C8A] bg-white hover:bg-[#F9F9FB] border border-[#E4E5E9] transition cursor-pointer"
+            >
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>Import Backup</span>
+            </button>
+
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file || !user?.email) return;
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                  const content = ev.target?.result as string;
+                  if (content && importVaultJson(user.email, content)) {
+                    await syncVaultToBackend(user.email);
+                    await fetchProfile();
+                    setMessage({ text: 'Backup imported and profile restored successfully!', type: 'success' });
+                  } else {
+                    setMessage({ text: 'Invalid backup file format.', type: 'error' });
+                  }
+                  if (importInputRef.current) importInputRef.current.value = '';
+                };
+                reader.readAsText(file);
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

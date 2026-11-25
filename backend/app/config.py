@@ -4,7 +4,9 @@ from pydantic_settings import BaseSettings
 def get_db_url() -> str:
     raw = os.getenv("DATABASE_URL", "").strip()
     if raw.startswith("postgres://"):
-        return raw.replace("postgres://", "postgresql://", 1)
+        raw = raw.replace("postgres://", "postgresql+pg8000://", 1)
+    elif raw.startswith("postgresql://") and "+pg8000" not in raw and "+psycopg2" not in raw:
+        raw = raw.replace("postgresql://", "postgresql+pg8000://", 1)
     if raw:
         return raw
     return "sqlite:////tmp/edupath.db" if os.getenv("VERCEL") else "sqlite:///./edupath.db"

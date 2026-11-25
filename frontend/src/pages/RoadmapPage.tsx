@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { RoadmapResponse, MilestoneItem } from '../types';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { getUserVault } from '../utils/dataVault';
 import { AiOrb } from '../components/common/AiOrb';
 
 interface RoadmapPageProps {
@@ -27,6 +29,7 @@ interface RoadmapPageProps {
 }
 
 export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
   const [roadmap, setRoadmap] = useState<RoadmapResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [recalibrating, setRecalibrating] = useState(false);
@@ -41,6 +44,19 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
     setLoading(true);
     try {
       const data = await api.getActiveRoadmap();
+      if (!data && user?.email) {
+        const vault = getUserVault(user.email);
+        if (vault?.target_career) {
+          try {
+            console.info('[Roadmap] Generating roadmap from vault target career...');
+            const genData = await api.generateRoadmap(vault.target_career);
+            setRoadmap(genData);
+            return;
+          } catch {
+            // non-fatal
+          }
+        }
+      }
       setRoadmap(data);
     } catch (err) {
       console.error(err);
@@ -51,7 +67,7 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchRoadmap();
-  }, []);
+  }, [user?.email]);
 
   const handleToggleStatus = async (m: MilestoneItem) => {
     const nextStatus = m.status === 'completed' ? 'in_progress' : 'completed';

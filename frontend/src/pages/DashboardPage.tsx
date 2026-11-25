@@ -19,6 +19,7 @@ import { AiOrb } from '../components/common/AiOrb';
 import { DashboardSummaryResponse, RoadmapResponse } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { getUserVault, syncVaultToBackend, isProfileNonEmpty } from '../utils/dataVault';
 
 interface DashboardPageProps {
   onNavigate: (route: string) => void;
@@ -38,7 +39,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         api.getActiveRoadmap()
       ]);
       if (sumRes.status === 'fulfilled') {
-        setData(sumRes.value);
+        const val = sumRes.value;
+        // Check if backend container cold-started and needs self-healing from user vault
+        if ((!val.target_career || val.total_skills_count === 0) && user?.email) {
+          const vault = getUserVault(user.email);
+          if (vault && (vault.target_career || (vault.profile && isProfileNonEmpty(vault.profile)))) {
+            console.info('[Dashboard] Self-healing dashboard data from local vault...');
+            await syncVaultToBackend(user.email);
+            const retryRes = await api.getDashboardSummary();
+            setData(retryRes);
+            return;
+          }
+        }
+        setData(val);
       }
       if (roadRes.status === 'fulfilled') {
         setRoadmap(roadRes.value);
@@ -52,7 +65,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchSummary();
-  }, []);
+  }, [user?.email]);
 
   if (loading && !data) {
     return (
