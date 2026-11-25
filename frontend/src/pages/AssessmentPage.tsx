@@ -94,8 +94,9 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const res = await api.submitAssessmentAnalysis(answers);
-      setAnalysisResult(res);
+      await api.submitAssessmentAnalysis(answers);
+      // Direct immediately to AI Career Match
+      onNavigate('/careers');
     } catch (err) {
       console.error('Error submitting assessment:', err);
     } finally {
@@ -233,10 +234,10 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
               >
                 <span>
                   {submitting
-                    ? 'Synthesizing Answers...'
+                    ? 'Submitting & Opening AI Career Match...'
                     : currentIdx < questions.length - 1
                     ? 'Next Step'
-                    : 'Analyze & Select Core Skill'}
+                    : 'Submit & Proceed to AI Career Match'}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
@@ -258,125 +259,35 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
         </div>
       )}
 
-      {/* 3. AI Analysis Result Card: ONLY ONE SKILL SELECTED */}
+      {/* 3. Completed State: Simple prompt directing to AI Career Match */}
       {analysisResult && !submitting && (
-        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-6 sm:p-8 shadow-soft space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E4E5E9]/60">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-normal bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20 mb-2.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#536C8A]" />
-                <span>AI Skill Assessment Completed</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-light text-[#17191C] tracking-tight">
-                Your Verified Core Superpower
-              </h2>
-              <p className="text-xs text-[#6F7782] mt-1 font-light">
-                AI analyzed all responses across technical skills, genuine interests, and work style to isolate your standout capability.
-              </p>
-            </div>
-
-            <button
-              onClick={handleRetake}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-normal text-[#6F7782] bg-[#F9F9FB] border border-[#E4E5E9] hover:text-[#17191C] hover:bg-white transition shrink-0 cursor-pointer"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Retake Assessment</span>
-            </button>
+        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-8 sm:p-12 shadow-soft text-center max-w-xl mx-auto space-y-5">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-6 h-6" />
           </div>
-
-          {/* Selected Single Skill Hero Banner */}
-          <div className="p-5 sm:p-7 rounded-[22px] bg-gradient-to-br from-[#F9F9FB] via-white to-[#C7B5D9]/10 border border-[#E4E5E9] flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden">
-            <div className="flex items-center gap-3.5 sm:gap-4 relative z-10">
-              <div className="flex shrink-0">
-                <AiOrb size="md" pulse={false} glow={true} className="sm:hidden" />
-                <AiOrb size="xl" pulse={false} glow={true} className="hidden sm:block" />
-              </div>
-              <div>
-                <span className="text-[11px] font-normal text-[#536C8A] uppercase tracking-wider block mb-1">
-                  Selected Best-Fit Core Skill
-                </span>
-                <h3 className="text-xl sm:text-3xl font-normal text-[#17191C]">
-                  {analysisResult.selected_best_fit_skill}
-                </h3>
-                <p className="text-xs text-[#6F7782] mt-1 sm:mt-1.5 max-w-md font-light">
-                  Domain Category: <strong className="text-[#17191C] font-normal">{analysisResult.skill_category}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-start sm:items-end shrink-0 relative z-10">
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-[#E4E5E9] shadow-soft">
-                <AiOrb size="xs" />
-                <span className="text-xs sm:text-sm font-normal text-[#17191C] font-mono">
-                  {analysisResult.confidence_score}% Match Confidence
-                </span>
-              </div>
-              <span className="text-[11px] text-[#6F7782] mt-1.5 font-light">High-conviction talent alignment</span>
-            </div>
-          </div>
-
-          {/* Why This Skill Was Selected */}
-          <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E4E5E9]">
-            <span className="text-xs font-normal text-[#17191C] uppercase tracking-wider block mb-1.5 flex items-center gap-2">
-              <AiOrb size="xs" glow={false} />
-              <span>Why This Core Skill Fits You</span>
-            </span>
-            <p className="text-sm text-[#6F7782] font-light leading-relaxed">
-              {analysisResult.why_this_skill}
+          <div>
+            <h2 className="text-xl sm:text-2xl font-light text-[#17191C]">
+              Skill Assessment Completed
+            </h2>
+            <p className="text-xs text-[#6F7782] mt-2 max-w-md mx-auto font-light leading-relaxed">
+              Your assessment answers have been recorded. Proceed directly to AI Career Match to analyze your verified skills, synthesize your profile details, and generate your adaptive learning roadmap.
             </p>
           </div>
 
-          {/* Strengths & Growth Areas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl bg-white border border-[#E4E5E9]">
-              <span className="text-xs font-normal text-[#17191C] uppercase tracking-wider block mb-2.5 flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-[#536C8A]" />
-                <span>Identified Strengths</span>
-              </span>
-              <ul className="space-y-2 text-xs text-[#6F7782] font-light">
-                {analysisResult.strengths?.map((str, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#536C8A] shrink-0 mt-0.5" />
-                    <span>{str}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-white border border-[#E4E5E9]">
-              <span className="text-xs font-normal text-[#17191C] uppercase tracking-wider block mb-2.5 flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-[#536C8A]" />
-                <span>Recommended Growth Areas</span>
-              </span>
-              <ul className="space-y-2 text-xs text-[#6F7782] font-light">
-                {analysisResult.growth_areas?.map((ga, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <ArrowRight className="w-3.5 h-3.5 text-[#536C8A] shrink-0 mt-0.5" />
-                    <span>{ga}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Summary */}
-          {analysisResult.analysis_summary && (
-            <div className="text-xs text-[#6F7782] font-light bg-[#F9F9FB] p-4 rounded-2xl border border-[#E4E5E9] leading-relaxed">
-              <strong className="text-[#17191C] font-normal">Assessment Synthesis:</strong> {analysisResult.analysis_summary}
-            </div>
-          )}
-
-          {/* Next Step CTA */}
-          <div className="pt-5 border-t border-[#E4E5E9]/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="text-xs text-[#6F7782] font-light">
-              Your core superpower is verified. Next, let AI analyze and select your single best-fit career match.
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
             <button
               onClick={() => onNavigate('/careers')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer"
             >
               <span>Proceed to AI Career Match</span>
               <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleRetake}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-normal text-[#6F7782] hover:text-[#17191C] bg-[#F9F9FB] border border-[#E4E5E9] transition cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retake Assessment</span>
             </button>
           </div>
         </div>

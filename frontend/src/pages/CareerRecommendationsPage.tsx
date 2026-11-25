@@ -37,6 +37,7 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
   const [bestFitSkill, setBestFitSkill] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [analyzing, setAnalyzing] = useState<boolean>(false);
+  const [generatingRoadmap, setGeneratingRoadmap] = useState<boolean>(false);
 
   // Chat state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -144,8 +145,22 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
     }
   };
 
+  const handleGenerateAndNavigateRoadmap = async () => {
+    if (!career) return;
+    setGeneratingRoadmap(true);
+    try {
+      await api.generateRoadmap(career.title);
+      onNavigate('/roadmap');
+    } catch (err) {
+      console.error('Error generating roadmap:', err);
+      onNavigate('/roadmap');
+    } finally {
+      setGeneratingRoadmap(false);
+    }
+  };
+
   const handleUnlockRoadmap = () => {
-    onNavigate('/roadmap');
+    handleGenerateAndNavigateRoadmap();
   };
 
   if (loading) {
@@ -184,53 +199,58 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-light text-[#17191C] tracking-tight">
-              {analyzing ? 'Synthesizing Your Verified Potential' : 'Discover Your Single Best-Fit Career Path'}
+              {analyzing ? 'Synthesizing Assessment & Profile...' : 'AI Career Match'}
             </h2>
 
             <p className="text-sm text-[#6F7782] mt-2.5 max-w-lg mx-auto font-light leading-relaxed">
               {analyzing
-                ? 'AI is cross-referencing your verified technical capabilities, projects, education, and genuine interests against live hiring demand...'
-                : 'Unlike generic platforms that present overwhelming, ambiguous lists, EduPath AI evaluates your verified competencies to select only ONE definitive, high-conviction career.'}
+                ? 'AI is cross-referencing your verified Skill Assessment responses and Profile details to select your single best-fit career...'
+                : 'Click below to synthesize your Skill Assessment results and Student Profile details. AI will determine your single optimal career match and prepare your custom learning roadmap.'}
             </p>
 
             {/* Status Box */}
             <div className="my-6 max-w-md mx-auto p-4.5 rounded-2xl bg-[#F9F9FB] border border-[#E4E5E9] text-left">
-              <div className="text-[11px] font-normal text-[#6F7782] uppercase tracking-wider mb-1.5">
-                Verified Superpower Status:
+              <div className="text-[11px] font-normal text-[#6F7782] uppercase tracking-wider mb-2">
+                Inputs for AI Career Analysis:
               </div>
-              {bestFitSkill ? (
-                <div className="flex items-center gap-2.5 text-sm font-normal text-[#17191C]">
-                  <CheckCircle2 className="w-4 h-4 text-[#536C8A] shrink-0" />
-                  <span>{bestFitSkill}</span>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-light text-[#17191C]">
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#536C8A]" />
+                    <span>Skill Assessment Responses</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-[#536C8A] bg-[#536C8A]/10 px-2 py-0.5 rounded-full">
+                    {bestFitSkill || 'Verified'}
+                  </span>
                 </div>
-              ) : (
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-[#6F7782] font-light">Skill Assessment Not Completed Yet</span>
-                  <button
-                    onClick={() => onNavigate('/assessment')}
-                    className="text-xs font-normal text-[#536C8A] hover:underline"
-                  >
-                    Take Assessment →
-                  </button>
+                <div className="flex items-center justify-between text-xs font-light text-[#17191C]">
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#536C8A]" />
+                    <span>Student Profile & Projects</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    Calibrated
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Analyze Button */}
             <button
               onClick={handleAnalyzeSkills}
               disabled={analyzing}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl text-xs sm:text-sm font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft disabled:opacity-50 cursor-pointer"
             >
               {analyzing ? (
                 <>
                   <AiOrb size="xs" pulse={true} glow={false} />
-                  <span>AI Analyzing Career Match...</span>
+                  <span>AI Analyzing Best-Fit Career...</span>
                 </>
               ) : (
                 <>
-                  <AiOrb size="xs" pulse={false} glow={false} />
-                  <span>Analyze My Skills & Select Best Career</span>
+                  <Sparkles className="w-4 h-4 text-[#C7B5D9]" />
+                  <span>Analyze Best-Fit Career Path</span>
+                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
@@ -354,25 +374,40 @@ export const CareerRecommendationsPage: React.FC<CareerRecommendationsPageProps>
             )}
 
             {/* Roadmap Unlock Banner CTA */}
-            <div className="mt-8 pt-6 border-t border-[#E4E5E9]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#536C8A]/10 text-[#536C8A] flex items-center justify-center shrink-0">
-                  <Unlock className="w-5 h-5" />
+            <div className="mt-8 p-6 sm:p-7 rounded-[22px] bg-gradient-to-r from-[#536C8A]/10 via-[#C7B5D9]/15 to-[#A8B9D0]/10 border border-[#C7B5D9]/40 flex flex-col md:flex-row items-center justify-between gap-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-[#E4E5E9] shadow-soft flex items-center justify-center shrink-0">
+                  <AiOrb size="sm" pulse={generatingRoadmap} glow={true} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-normal text-[#17191C]">Adaptive Learning Roadmap Unlocked</h4>
-                  <p className="text-xs text-[#6F7782] font-light">
-                    Week-by-week milestones, capstone projects, and curated free resources are ready.
+                  <span className="text-[11px] font-normal uppercase tracking-wider text-[#536C8A] block mb-0.5">
+                    Step 3 of 4: Next Roadmap Milestone
+                  </span>
+                  <h4 className="text-base sm:text-lg font-normal text-[#17191C]">
+                    Generate AI Adaptive Learning Roadmap
+                  </h4>
+                  <p className="text-xs text-[#6F7782] font-light mt-0.5 max-w-lg">
+                    AI will use your verified career match ({career.title}) to architect a personalized 8-week milestone curriculum with weekly skills, projects, and learning resources.
                   </p>
                 </div>
               </div>
 
               <button
-                onClick={handleUnlockRoadmap}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer"
+                onClick={handleGenerateAndNavigateRoadmap}
+                disabled={generatingRoadmap}
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft shrink-0 cursor-pointer disabled:opacity-50"
               >
-                <span>Open Adaptive Roadmap</span>
-                <ArrowRight className="w-4 h-4" />
+                {generatingRoadmap ? (
+                  <>
+                    <AiOrb size="xs" pulse={true} glow={true} />
+                    <span>AI Creating Roadmap...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Generate AI Roadmap & View Trajectory</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
           </div>
