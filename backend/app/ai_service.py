@@ -16,16 +16,20 @@ class GeminiModelWrapper:
         self.model_name = model_name
         self.api_key = api_key
 
-    def generate_content(self, prompt: str) -> GeminiResponse:
+    def generate_content(self, prompt: str, *args, **kwargs) -> GeminiResponse:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
-        payload = {
+        payload: Dict[str, Any] = {
             "contents": [
                 {
                     "parts": [{"text": prompt}]
                 }
             ]
         }
-        resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
+        gen_config = kwargs.get("generation_config")
+        if gen_config:
+            payload["generationConfig"] = gen_config
+
+        resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=8)
         resp.raise_for_status()
         data = resp.json()
         text = data["candidates"][0]["content"]["parts"][0]["text"]

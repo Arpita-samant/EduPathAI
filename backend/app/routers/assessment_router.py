@@ -42,7 +42,12 @@ def submit_assessment(
     selected_skill = analysis["selected_best_fit_skill"]
     
     # Save in profile
-    if profile:
+    if not profile:
+        profile = models.StudentProfile(user_id=current_user.id, best_fit_skill=selected_skill)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+    else:
         profile.best_fit_skill = selected_skill
         # If technical skills already exist, mark the relevant one as verified or add it
         skills = profile.technical_skills or []

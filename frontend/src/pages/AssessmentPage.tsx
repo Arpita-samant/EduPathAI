@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { AssessmentQuestionItem, AssessmentAnalysisResponse } from '../types';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { saveUserVault } from '../utils/dataVault';
 import { AiOrb } from '../components/common/AiOrb';
 
 interface AssessmentPageProps {
@@ -20,6 +22,7 @@ interface AssessmentPageProps {
 }
 
 export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
   const [questions, setQuestions] = useState<AssessmentQuestionItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -95,12 +98,11 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ onNavigate }) =>
     setSubmitting(true);
     try {
       await api.submitAssessmentAnalysis(answers);
-      // Direct immediately to AI Career Match
-      onNavigate('/careers');
     } catch (err) {
-      console.error('Error submitting assessment:', err);
+      console.warn('Backend assessment submission error, proceeding to career match:', err);
     } finally {
       setSubmitting(false);
+      onNavigate('/careers');
     }
   };
 
