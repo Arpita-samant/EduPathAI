@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -13,10 +14,10 @@ async def analyze_ats(
     job_description: str = Form(...),
     resume_text: str = Form(None),
     resume_file: UploadFile = File(None),
-    current_user: models.User = Depends(auth.get_current_user),
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     db: Session = Depends(get_db)
 ):
-    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first()
+    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first() if current_user else None
 
     resolved_resume_text = ""
     if resume_file and resume_file.filename:
@@ -28,47 +29,54 @@ async def analyze_ats(
     elif profile and profile.raw_resume_text:
         resolved_resume_text = profile.raw_resume_text
     else:
-        # Synthesize from profile attributes if no raw text exists
-        skills_str = ", ".join(s.get("name", "") for s in (profile.technical_skills or [])) if profile else "TypeScript, React, Python, SQL"
+        # Synthesize from profile attributes or general background if no raw text exists
+        skills_str = ", ".join(s.get("name", "") for s in (profile.technical_skills or [])) if profile else "TypeScript, React, Python, SQL, REST APIs"
         projects_str = "\n".join(f"- {p.get('title')}: {p.get('description')}" for p in (profile.projects or [])) if profile else ""
-        resolved_resume_text = f"Candidate: {current_user.full_name}\nSkills: {skills_str}\nEducation: {profile.degree if profile else 'Computer Science'}\nProjects:\n{projects_str}"
+        candidate_name = current_user.full_name if current_user else "Applicant"
+        resolved_resume_text = f"Candidate: {candidate_name}\nSkills: {skills_str}\nEducation: {profile.degree if profile else 'Computer Science & Engineering'}\nProjects:\n{projects_str}"
 
     if len(resolved_resume_text.strip()) < 30:
         raise HTTPException(status_code=400, detail="Resume text is too short to evaluate. Please provide a valid resume.")
 
     analysis_data = analyze_resume_ats(resolved_resume_text, job_description, target_role)
 
-    # Save record
-    ats_record = models.AtsAnalysis(
-        user_id=current_user.id,
-        target_role=target_role,
-        job_description=job_description,
-        ats_score=analysis_data.get("ats_score", 80),
-        matched_keywords=analysis_data.get("matched_keywords", []),
-        missing_keywords=analysis_data.get("missing_keywords", []),
-        formatting_issues=analysis_data.get("formatting_issues", []),
-        rewrite_suggestions=analysis_data.get("rewrite_suggestions", [])
-    )
-    db.add(ats_record)
-    db.commit()
-    db.refresh(ats_record)
+    # Save record if user logged in
+    rec_id = "ats-guest-analysis"
+    if current_user:
+        ats_record = models.AtsAnalysis(
+            user_id=current_user.id,
+            target_role=target_role,
+            job_description=job_description,
+            ats_score=analysis_data.get("ats_score", 80),
+            matched_keywords=analysis_data.get("matched_keywords", []),
+            missing_keywords=analysis_data.get("missing_keywords", []),
+            formatting_issues=analysis_data.get("formatting_issues", []),
+            rewrite_suggestions=analysis_data.get("rewrite_suggestions", [])
+        )
+        db.add(ats_record)
+        db.commit()
+        db.refresh(ats_record)
+        rec_id = ats_record.id
 
     return {
-        "id": ats_record.id,
+        "id": rec_id,
         "target_role": target_role,
-        "ats_score": ats_record.ats_score,
-        "matched_keywords": ats_record.matched_keywords,
-        "missing_keywords": ats_record.missing_keywords,
-        "formatting_issues": ats_record.formatting_issues,
-        "rewrite_suggestions": ats_record.rewrite_suggestions,
+        "ats_score": analysis_data.get("ats_score", 80),
+        "matched_keywords": analysis_data.get("matched_keywords", []),
+        "missing_keywords": analysis_data.get("missing_keywords", []),
+        "formatting_issues": analysis_data.get("formatting_issues", []),
+        "rewrite_suggestions": analysis_data.get("rewrite_suggestions", []),
         "summary_verdict": analysis_data.get("summary_verdict", "Analysis complete.")
     }
 
 @router.get("/latest", response_model=schemas.AtsAnalysisResponse)
 def get_latest_ats(
-    current_user: models.User = Depends(auth.get_current_user),
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     db: Session = Depends(get_db)
 ):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="No ATS analysis on file yet.")
+
     record = db.query(models.AtsAnalysis).filter(
         models.AtsAnalysis.user_id == current_user.id
     ).order_by(models.AtsAnalysis.created_at.desc()).first()

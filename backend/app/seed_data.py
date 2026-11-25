@@ -721,9 +721,10 @@ Undergraduate Peer Tutor — Computer Science Dept. (Aug 2024 - Present)
         }
     ]
 
-    for res_info in resources_seed:
+    from app.curated_courses import CURATED_COURSES_100
+    for res_info in CURATED_COURSES_100:
         res = models.LearningResource(**res_info)
         db.add(res)
     db.commit()
 
-    print("Seeding complete! Demo student, 18 realistic jobs, and 26 high-yield resources initialized.")
+    print("Seeding complete! Demo student, realistic jobs, and 100 free curated courses initialized.")

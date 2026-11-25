@@ -76,6 +76,21 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
     onNavigate('/resume-ats');
   };
 
+  // Instant real-time as-you-type search matching title, company, domain, description, and skills
+  const displayedJobs = jobs.filter((job) => {
+    if (!search.trim()) return true;
+    const term = search.trim().toLowerCase();
+    return (
+      job.title.toLowerCase().includes(term) ||
+      job.company.toLowerCase().includes(term) ||
+      job.domain.toLowerCase().includes(term) ||
+      job.description.toLowerCase().includes(term) ||
+      (job.required_skills && job.required_skills.some((s) => s.toLowerCase().includes(term))) ||
+      (job.matched_skills && job.matched_skills.some((s) => s.toLowerCase().includes(term))) ||
+      (job.missing_skills && job.missing_skills.some((s) => s.toLowerCase().includes(term)))
+    );
+  });
+
   const getSourceBadgeStyle = (source?: string) => {
     const s = (source || '').toLowerCase();
     if (s.includes('jobicy')) {
@@ -121,7 +136,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
               <span>Refresh Feed</span>
             </button>
             <span className="font-mono text-xs font-normal text-[#6F7782] bg-[#F9F9FB] px-3.5 py-2 rounded-xl border border-[#E4E5E9]">
-              {jobs.length} Roles Active
+              {displayedJobs.length} Roles Active
             </span>
           </div>
         </div>
@@ -239,7 +254,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
       </div>
 
       {/* Jobs Grid or Empty State */}
-      {jobs.length === 0 && !loading ? (
+      {displayedJobs.length === 0 && !loading ? (
         <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-12 text-center max-w-xl mx-auto shadow-soft">
           <AiOrb size="md" pulse={true} className="mx-auto mb-4" />
           <h3 className="text-lg font-normal text-[#17191C] mb-1">No Opportunities Found for Selected Filters</h3>
@@ -261,7 +276,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {jobs.map((job) => (
+          {displayedJobs.map((job) => (
             <div
               key={job.id}
               className="bg-white rounded-[22px] border border-[#E4E5E9] p-5.5 hover:border-[#A8B9D0]/60 shadow-soft transition flex flex-col justify-between"

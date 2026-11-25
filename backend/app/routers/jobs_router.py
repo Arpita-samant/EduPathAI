@@ -33,7 +33,7 @@ def get_job_matches(
     role_type: Optional[str] = None,
     experience_level: Optional[str] = None,
     search: Optional[str] = None,
-    current_user: models.User = Depends(auth.get_current_user),
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     """
@@ -43,7 +43,7 @@ def get_job_matches(
     3. Himalayas (Remote Jobs API)
     4. Adzuna (Developer API with Key 171c50966d0d1f32a46e12efa55dea28)
     """
-    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first()
+    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first() if current_user else None
     user_skill_names = [s.get("name", "") for s in (profile.technical_skills or [])] if profile else []
 
     # Fetch real-time live jobs from all 4 providers (profile-independent)!
@@ -70,10 +70,10 @@ def get_job_matches(
 @router.get("/{job_id}", response_model=schemas.JobMatchItem)
 def get_job_detail(
     job_id: str,
-    current_user: models.User = Depends(auth.get_current_user),
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     db: Session = Depends(get_db)
 ):
-    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first()
+    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first() if current_user else None
     user_skill_names = [s.get("name", "") for s in (profile.technical_skills or [])] if profile else []
 
     # Check live cached jobs first

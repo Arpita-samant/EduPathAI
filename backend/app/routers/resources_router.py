@@ -1,8 +1,10 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.database import get_db
 from app import models, schemas, auth
+from app.curated_courses import CURATED_COURSES_100
 
 router = APIRouter(prefix="/resources", tags=["Curated Learning Resources"])
 
@@ -13,10 +15,19 @@ def get_resources(
     difficulty: Optional[str] = None,
     search: Optional[str] = None,
     prioritize_gaps: bool = True,
-    current_user: models.User = Depends(auth.get_current_user),
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     db: Session = Depends(get_db)
 ):
-    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first()
+    # Auto-seed the 100 free curated courses if not already present
+    existing_count = db.query(models.LearningResource).count()
+    if existing_count < 100:
+        existing_titles = {t[0] for t in db.query(models.LearningResource.title).all()}
+        for course in CURATED_COURSES_100:
+            if course["title"] not in existing_titles:
+                db.add(models.LearningResource(**course))
+        db.commit()
+
+    profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first() if current_user else None
     
     # Identify gaps
     user_skills_dict = {s.get("name", "").lower(): s for s in (profile.technical_skills if profile else [])}
@@ -31,17 +42,18 @@ def get_resources(
 
     query = db.query(models.LearningResource)
     if skill:
-        query = query.filter(models.LearningResource.skill_tag.ilike(f"%{skill}%"))
+        skill_term = f"%{skill.strip().lower()}%"
+        query = query.filter(func.lower(models.LearningResource.skill_tag).like(skill_term))
     if resource_type:
         query = query.filter(models.LearningResource.resource_type == resource_type)
     if difficulty:
         query = query.filter(models.LearningResource.difficulty == difficulty)
     if search:
-        search_fmt = f"%{search}%"
+        search_fmt = f"%{search.strip().lower()}%"
         query = query.filter(
-            (models.LearningResource.title.ilike(search_fmt)) |
-            (models.LearningResource.provider.ilike(search_fmt)) |
-            (models.LearningResource.skill_tag.ilike(search_fmt))
+            (func.lower(models.LearningResource.title).like(search_fmt)) |
+            (func.lower(models.LearningResource.provider).like(search_fmt)) |
+            (func.lower(models.LearningResource.skill_tag).like(search_fmt))
         )
 
     all_resources = query.all()

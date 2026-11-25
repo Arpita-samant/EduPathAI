@@ -120,9 +120,18 @@ export const AtsResumePage: React.FC = () => {
               >
                 <Upload className="w-3.5 h-3.5 text-[#536C8A] shrink-0" />
                 <span className="truncate">
-                  {selectedFile ? selectedFile.name : 'Choose file (or uses profile text if empty)'}
+                  {selectedFile ? selectedFile.name : 'Upload PDF/DOCX (or paste text below)'}
                 </span>
               </button>
+              {selectedFile && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedFile(null)}
+                  className="p-2 text-[#6F7782] hover:text-[#17191C] text-xs font-light"
+                >
+                  Clear
+                </button>
+              )}
               <input
                 type="file"
                 ref={fileInputRef}
@@ -132,6 +141,21 @@ export const AtsResumePage: React.FC = () => {
               />
             </div>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-normal text-[#6F7782] mb-1.5 flex items-center justify-between">
+            <span>Or Paste Resume Text (No profile or file upload needed)</span>
+            {selectedFile && <span className="text-[11px] text-[#536C8A]">Uploaded file active</span>}
+          </label>
+          <textarea
+            rows={3}
+            value={resumeText}
+            onChange={(e) => setResumeText(e.target.value)}
+            disabled={!!selectedFile}
+            placeholder="Paste your resume experience, skills, and projects here directly..."
+            className="w-full px-4 py-2.5 text-xs text-[#17191C] placeholder-[#6F7782]/50 rounded-2xl border border-[#E4E5E9] focus:border-[#536C8A] outline-none bg-white transition font-light leading-relaxed disabled:bg-[#F9F9FB] disabled:text-[#6F7782]"
+          />
         </div>
 
         <div>

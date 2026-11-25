@@ -445,8 +445,10 @@ def get_aggregated_live_jobs(
             j for j in processed_jobs
             if sq in j.get("title", "").lower()
             or sq in j.get("company", "").lower()
+            or sq in j.get("domain", "").lower()
             or sq in j.get("description", "").lower()
             or any(sq in s.lower() for s in j.get("required_skills", []))
+            or any(sq in s.lower() for s in j.get("matched_skills", []))
         ]
 
     # Sort: highest match percentage first

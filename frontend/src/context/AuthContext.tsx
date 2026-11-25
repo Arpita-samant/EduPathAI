@@ -24,6 +24,7 @@ interface LocalAccountRecord {
 }
 
 const LOCAL_ACCOUNTS_KEY = 'edupath_local_accounts';
+const ACTIVE_EMAIL_KEY = 'edupath_active_email';
 
 const getSavedAccounts = (): Record<string, LocalAccountRecord> => {
   try {
@@ -63,33 +64,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         syncVaultToBackend(me.email).catch(() => {});
       }
     } catch {
-      // If serverless container recycled /tmp database, recover seamlessly from local account vault
-      const accounts = getSavedAccounts();
-      const accountKeys = Object.keys(accounts);
-      if (accountKeys.length > 0) {
-        // Pick the most recently active account
-        const sorted = accountKeys
-          .map(k => accounts[k])
-          .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
-        const latestAcc = sorted[0];
+      // If serverless container recycled /tmp database, recover seamlessly ONLY for the active signed-in user
+      const activeEmail = localStorage.getItem(ACTIVE_EMAIL_KEY)?.toLowerCase();
+      if (activeEmail) {
+        const accounts = getSavedAccounts();
+        const targetAcc = accounts[activeEmail];
 
-        if (latestAcc && latestAcc.email && latestAcc.password) {
+        if (targetAcc && targetAcc.email && targetAcc.password) {
           try {
-            console.info(`[AuthContext] Auto-restoring session for ${latestAcc.email} after container cold-start...`);
+            console.info(`[AuthContext] Auto-restoring session for ${targetAcc.email} after container cold-start...`);
             let regRes;
             try {
-              regRes = await api.login({ email: latestAcc.email, password: latestAcc.password });
+              regRes = await api.login({ email: targetAcc.email, password: targetAcc.password });
             } catch {
               regRes = await api.register({
-                email: latestAcc.email,
-                password: latestAcc.password,
-                full_name: latestAcc.fullName || 'Explorer'
+                email: targetAcc.email,
+                password: targetAcc.password,
+                full_name: targetAcc.fullName || 'Explorer'
               });
             }
             localStorage.setItem('edupath_token', regRes.access_token);
             setToken(regRes.access_token);
             setUser(regRes.user);
-            await syncVaultToBackend(latestAcc.email);
+            await syncVaultToBackend(targetAcc.email);
             return;
           } catch (autoErr) {
             console.warn('[AuthContext] Session auto-restoration failed:', autoErr);
@@ -98,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       localStorage.removeItem('edupath_token');
+      localStorage.removeItem(ACTIVE_EMAIL_KEY);
       setToken(null);
       setUser(null);
     } finally {
@@ -116,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await api.login({ email: cleanEmail, password: cleanPass });
       localStorage.setItem('edupath_token', res.access_token);
+      localStorage.setItem(ACTIVE_EMAIL_KEY, cleanEmail);
       setToken(res.access_token);
       setUser(res.user);
       saveLocalAccount(cleanEmail, cleanPass, res.user.full_name || 'Explorer');
@@ -134,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             full_name: localAcc.fullName || 'Explorer'
           });
           localStorage.setItem('edupath_token', regRes.access_token);
+          localStorage.setItem(ACTIVE_EMAIL_KEY, cleanEmail);
           setToken(regRes.access_token);
           setUser(regRes.user);
           saveUserVault(cleanEmail, { fullName: localAcc.fullName });
@@ -154,6 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const res = await api.register({ email: cleanEmail, password: cleanPass, full_name: cleanName });
     localStorage.setItem('edupath_token', res.access_token);
+    localStorage.setItem(ACTIVE_EMAIL_KEY, cleanEmail);
     setToken(res.access_token);
     setUser(res.user);
     saveLocalAccount(cleanEmail, cleanPass, cleanName);
@@ -166,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await api.loginDemo();
       localStorage.setItem('edupath_token', res.access_token);
+      localStorage.setItem(ACTIVE_EMAIL_KEY, 'demo@edupath.ai');
       setToken(res.access_token);
       setUser(res.user);
     } finally {
@@ -175,6 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('edupath_token');
+    localStorage.removeItem(ACTIVE_EMAIL_KEY);
     setToken(null);
     setUser(null);
   };
