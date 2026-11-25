@@ -1,22 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
-  MapPin,
   CheckCircle2,
-  Clock,
-  Sparkles,
   Download,
   ExternalLink,
-  GitBranch,
-  RefreshCw,
-  FolderGit2,
-  AlertCircle,
-  Filter,
-  Layers,
-  ChevronDown,
-  ChevronUp,
   ArrowRight,
-  UserCheck,
-  Lock
+  BookOpen
 } from 'lucide-react';
 import { RoadmapResponse, MilestoneItem } from '../types';
 import { api } from '../api/client';
@@ -32,13 +20,7 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
   const { user } = useAuth();
   const [roadmap, setRoadmap] = useState<RoadmapResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [recalibrating, setRecalibrating] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'in_progress' | 'completed'>('all');
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'info' } | null>(null);
-
-  // Modal / input state for submitting GitHub link
-  const [editingMilestoneId, setEditingMilestoneId] = useState<string | null>(null);
-  const [githubUrlInput, setGithubUrlInput] = useState('');
 
   const fetchRoadmap = async () => {
     setLoading(true);
@@ -48,7 +30,6 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
         const vault = getUserVault(user.email);
         if (vault?.target_career) {
           try {
-            console.info('[Roadmap] Generating roadmap from vault target career...');
             const genData = await api.generateRoadmap(vault.target_career);
             setRoadmap(genData);
             return;
@@ -70,48 +51,28 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
   }, [user?.email]);
 
   const handleToggleStatus = async (m: MilestoneItem) => {
-    const nextStatus = m.status === 'completed' ? 'in_progress' : 'completed';
+    const nextStatus: 'completed' | 'in_progress' = m.status === 'completed' ? 'in_progress' : 'completed';
+    // Optimistic UI update
+    setRoadmap((prev) => {
+      if (!prev) return prev;
+      const updated: MilestoneItem[] = prev.milestones.map((item) =>
+        item.id === m.id ? { ...item, status: nextStatus } : item
+      );
+      const compCount = updated.filter((i) => i.status === 'completed').length;
+      const pct = Math.round((compCount / (updated.length || 1)) * 100);
+      return {
+        ...prev,
+        milestones: updated,
+        completed_milestones: compCount,
+        progress_percentage: pct
+      };
+    });
+
     try {
-      await api.updateMilestone(m.id, nextStatus, m.project_github_url);
-      await fetchRoadmap();
-      setMessage({
-        text: `Milestone Week ${m.week_number} marked as ${nextStatus}! Career Readiness Score updated.`,
-        type: 'success'
-      });
+      await api.updateMilestone(m.id, nextStatus);
     } catch (err: any) {
       console.error(err);
-    }
-  };
-
-  const handleSaveGithubUrl = async (mId: string) => {
-    try {
-      await api.updateMilestone(mId, 'completed', githubUrlInput);
-      setEditingMilestoneId(null);
-      setGithubUrlInput('');
-      await fetchRoadmap();
-      setMessage({
-        text: 'Project GitHub repository submitted! Milestone marked completed.',
-        type: 'success'
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRecalibrate = async () => {
-    setRecalibrating(true);
-    setMessage(null);
-    try {
-      const res = await api.recalibrateRoadmap();
-      await fetchRoadmap();
-      setMessage({
-        text: res.message || 'Roadmap re-calibrated successfully based on recent progress!',
-        type: 'success'
-      });
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      setRecalibrating(false);
+      fetchRoadmap();
     }
   };
 
@@ -126,14 +87,11 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
   };
 
   const handleExportPDF = () => {
-    if (!roadmap) {
-      setMessage({ text: 'Roadmap data is not loaded yet.', type: 'info' });
-      return;
-    }
+    if (!roadmap) return;
 
     const printWindow = window.open('', '_blank', 'width=960,height=850');
     if (!printWindow) {
-      alert('Please enable popups in your browser to export your roadmap as a PDF.');
+      alert('Please enable popups in your browser to download your roadmap.');
       return;
     }
 
@@ -156,21 +114,19 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
 
     phases.forEach((phase) => {
       const phaseMilestones = milestones.filter(
-        (m) => (m.phase || '').toLowerCase() === phase.toLowerCase() ||
-               (phase === 'Capstone & Job-Ready' && (m.phase || '').toLowerCase().includes('capstone'))
+        (m) => (m.phase || '').toLowerCase().includes(phase.toLowerCase().split(' ')[0])
       );
-      const itemsToRender = phaseMilestones.length > 0 ? phaseMilestones : (phase === 'Foundation' ? milestones : []);
-      if (itemsToRender.length === 0 && phaseMilestones.length === 0) return;
+      if (phaseMilestones.length === 0) return;
 
       milestonesSectionsHtml += `
         <div class="phase-section">
-          <div class="phase-title-badge">
+          <div class="phase-title">
             <span>${escapeHtml(phase)} Phase</span>
           </div>
           <div class="milestones-grid">
       `;
 
-      itemsToRender.forEach((m) => {
+      phaseMilestones.forEach((m) => {
         const isDone = m.status === 'completed';
         const isCurrent = m.status === 'in_progress';
         const statusLabel = isDone ? 'Completed' : (isCurrent ? 'In Progress' : 'Pending');
@@ -178,18 +134,12 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
 
         const topicsList = (m.topics || []).map((t: any) => {
           const tName = typeof t === 'string' ? t : t.name;
-          const tDone = typeof t === 'object' && t.completed;
-          return `
-            <li class="topic-item ${tDone ? 'topic-done' : ''}">
-              <span class="topic-icon">${tDone ? '✓' : '•'}</span>
-              <span>${escapeHtml(tName)}</span>
-            </li>
-          `;
-        }).join('');
+          return `<span class="topic-tag">${escapeHtml(tName)}</span>`;
+        }).join(' ');
 
         const resourcesList = (m.resource_links || []).map((r: any) => `
           <a href="${escapeHtml(r.url || '#')}" target="_blank" class="resource-link">
-            ${escapeHtml(r.title || 'Resource')} <span class="res-tag">(${escapeHtml(r.type || 'Guide')})</span>
+            ${escapeHtml(r.title || 'Resource')}
           </a>
         `).join('');
 
@@ -198,37 +148,30 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
             <div class="milestone-header">
               <div class="milestone-meta">
                 <span class="week-pill">Week ${m.week_number}</span>
-                <span class="phase-label">${escapeHtml(m.phase || phase)}</span>
+                <span class="milestone-title">${escapeHtml(m.title)}</span>
               </div>
               <span class="status-badge ${statusBadgeClass}">${statusLabel}</span>
             </div>
 
-            <h3 class="milestone-title">${escapeHtml(m.title)}</h3>
             <p class="milestone-desc">${escapeHtml(m.description || '')}</p>
 
             ${topicsList ? `
               <div class="section-group">
-                <div class="group-title">Key Learning Topics:</div>
-                <ul class="topics-list">${topicsList}</ul>
+                <div class="group-title">Topics to Learn:</div>
+                <div class="topics-wrap">${topicsList}</div>
               </div>
             ` : ''}
 
             ${m.project_prompt ? `
               <div class="section-group project-box">
-                <div class="group-title">Hands-on Practical Project:</div>
+                <div class="group-title">Weekly Project:</div>
                 <div class="project-text">${escapeHtml(m.project_prompt)}</div>
-                ${m.project_github_url ? `
-                  <div class="github-link">
-                    <strong>Submitted GitHub Repo:</strong>
-                    <span>${escapeHtml(m.project_github_url)}</span>
-                  </div>
-                ` : ''}
               </div>
             ` : ''}
 
             ${resourcesList ? `
               <div class="section-group">
-                <div class="group-title">Curated Free Learning Resources:</div>
+                <div class="group-title">Recommended Resources:</div>
                 <div class="resources-flex">${resourcesList}</div>
               </div>
             ` : ''}
@@ -247,9 +190,8 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
         <div class="milestone-card">
           <div class="milestone-header">
             <span class="week-pill">Week ${m.week_number}</span>
-            <span class="status-badge badge-${m.status}">${m.status}</span>
+            <span class="milestone-title">${escapeHtml(m.title)}</span>
           </div>
-          <h3 class="milestone-title">${escapeHtml(m.title)}</h3>
           <p class="milestone-desc">${escapeHtml(m.description || '')}</p>
         </div>
       `).join('');
@@ -259,9 +201,9 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CareerVector Roadmap - ${escapeHtml(targetCareer)}</title>
+  <title>Career Roadmap - ${escapeHtml(targetCareer)}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
     * {
       box-sizing: border-box;
@@ -270,7 +212,7 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       color: #17191C;
       background: #F9F9FB;
       line-height: 1.5;
@@ -307,11 +249,6 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
       color: #6F7782;
     }
 
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
     .btn {
       padding: 8px 16px;
       font-size: 13px;
@@ -319,7 +256,6 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
       border-radius: 8px;
       cursor: pointer;
       border: none;
-      transition: all 0.2s;
     }
 
     .btn-primary {
@@ -327,165 +263,129 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
       color: white;
     }
 
-    .btn-primary:hover {
-      background: #193D50;
-    }
-
     .btn-secondary {
       background: #F9F9FB;
       color: #17191C;
       border: 1px solid #E4E5E9;
+      margin-left: 8px;
     }
 
     .doc-header {
       border-bottom: 2px solid #E4E5E9;
-      padding-bottom: 24px;
-      margin-bottom: 28px;
-    }
-
-    .brand-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .brand-name {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #536C8A;
-      letter-spacing: -0.5px;
-    }
-
-    .doc-badge {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      color: #536C8A;
-      background: rgba(83, 108, 138, 0.08);
-      padding: 4px 12px;
-      border-radius: 9999px;
-      border: 1px solid rgba(83, 108, 138, 0.2);
+      margin-bottom: 4px;
     }
 
     .main-title {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 600;
       color: #17191C;
       margin-bottom: 6px;
-      letter-spacing: -0.5px;
     }
 
     .sub-meta {
-      font-size: 13px;
+      font-size: 12px;
       color: #6F7782;
       display: flex;
-      flex-wrap: wrap;
       gap: 16px;
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    .stats-row {
+      display: flex;
       gap: 12px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .stat-box {
+      flex: 1;
       background: #F9F9FB;
       border: 1px solid #E4E5E9;
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 10px;
+      padding: 12px;
       text-align: center;
     }
 
     .stat-val {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: #17191C;
-      margin-bottom: 2px;
     }
 
     .stat-lbl {
       font-size: 11px;
       color: #6F7782;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      margin-top: 2px;
     }
 
     .phase-section {
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
-    .phase-title-badge {
-      margin-bottom: 14px;
-      display: inline-block;
-    }
-
-    .phase-title-badge span {
+    .phase-title {
       font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.5px;
       color: #536C8A;
-      border-bottom: 2px solid #536C8A;
+      margin-bottom: 12px;
       padding-bottom: 4px;
+      border-bottom: 1px solid #E4E5E9;
     }
 
     .milestones-grid {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
 
     .milestone-card {
       border: 1px solid #E4E5E9;
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 10px;
+      padding: 16px;
       background: #ffffff;
       page-break-inside: avoid;
-      break-inside: avoid;
-    }
-
-    .milestone-card.current-card {
-      border-color: #536C8A;
-      box-shadow: 0 2px 8px rgba(83, 108, 138, 0.08);
     }
 
     .milestone-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .milestone-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .week-pill {
       font-size: 11px;
       font-weight: 600;
-      background: #17191C;
+      background: #536C8A;
       color: white;
-      padding: 2px 10px;
-      border-radius: 9999px;
+      padding: 2px 8px;
+      border-radius: 6px;
     }
 
-    .phase-label {
-      font-size: 12px;
-      color: #6F7782;
+    .milestone-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #17191C;
     }
 
     .status-badge {
       font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 9999px;
-      text-transform: uppercase;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 6px;
     }
 
     .badge-completed {
@@ -494,7 +394,7 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
     }
 
     .badge-progress {
-      background: rgba(83, 108, 138, 0.12);
+      background: #EFF6FF;
       color: #536C8A;
     }
 
@@ -503,84 +403,57 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
       color: #6F7782;
     }
 
-    .milestone-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #17191C;
-      margin-bottom: 8px;
-    }
-
     .milestone-desc {
-      font-size: 13px;
+      font-size: 12px;
       color: #555E68;
-      line-height: 1.6;
-      margin-bottom: 14px;
+      line-height: 1.5;
+      margin-bottom: 10px;
     }
 
     .section-group {
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed #E4E5E9;
+      margin-top: 8px;
     }
 
     .group-title {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: #17191C;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
-    .topics-list {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-    }
-
-    .topic-item {
-      font-size: 12px;
-      color: #4A5568;
+    .topics-wrap {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       gap: 6px;
     }
 
-    .topic-done {
-      color: #2E7D32;
-      text-decoration: line-through;
-    }
-
-    .topic-icon {
-      font-weight: bold;
-      color: #536C8A;
+    .topic-tag {
+      font-size: 11px;
+      background: #F9F9FB;
+      border: 1px solid #E4E5E9;
+      color: #17191C;
+      padding: 2px 8px;
+      border-radius: 4px;
     }
 
     .project-box {
       background: #F9F9FB;
       border-radius: 8px;
-      padding: 12px;
-      margin-top: 12px;
-      border-top: none;
+      padding: 10px;
+      margin-top: 8px;
       border: 1px solid #E4E5E9;
     }
 
     .project-text {
-      font-size: 12px;
-      color: #2D3748;
-      line-height: 1.5;
-    }
-
-    .github-link {
       font-size: 11px;
-      color: #536C8A;
-      margin-top: 6px;
-      word-break: break-all;
+      color: #2D3748;
+      line-height: 1.4;
     }
 
     .resources-flex {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     .resource-link {
@@ -589,18 +462,13 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
       text-decoration: none;
       background: #F9F9FB;
       border: 1px solid #E4E5E9;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .res-tag {
-      color: #6F7782;
-      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
     }
 
     .doc-footer {
-      margin-top: 40px;
-      padding-top: 16px;
+      margin-top: 32px;
+      padding-top: 12px;
       border-top: 1px solid #E4E5E9;
       text-align: center;
       font-size: 11px;
@@ -620,10 +488,6 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
         padding: 0 !important;
         max-width: 100% !important;
       }
-      .milestone-card {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
       @page {
         size: A4 portrait;
         margin: 15mm 12mm 15mm 12mm;
@@ -633,52 +497,44 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
 </head>
 <body>
   <div class="action-bar">
-    <span class="tip"><strong>Tip:</strong> In the print destination dialog, select <strong>Save as PDF</strong> to download your roadmap.</span>
-    <div class="action-buttons">
-      <button class="btn btn-primary" onclick="window.print()">Save as PDF / Print</button>
+    <span class="tip">In the print destination dialog, select <strong>Save as PDF</strong> to download your roadmap.</span>
+    <div>
+      <button class="btn btn-primary" onclick="window.print()">Save as PDF</button>
       <button class="btn btn-secondary" onclick="window.close()">Close</button>
     </div>
   </div>
 
   <div class="container">
     <div class="doc-header">
-      <div class="brand-row">
-        <span class="brand-name">CareerVector AI</span>
-        <span class="doc-badge">Official Learning Roadmap</span>
-      </div>
-      <h1 class="main-title">${escapeHtml(targetCareer)}</h1>
+      <div class="brand-name">CareerVector AI</div>
+      <h1 class="main-title">${escapeHtml(targetCareer)} Roadmap</h1>
       <div class="sub-meta">
-        <span><strong>Student:</strong> ${escapeHtml(studentName)} (${escapeHtml(studentEmail)})</span>
-        <span><strong>Date Generated:</strong> ${escapeHtml(generatedDate)}</span>
-        <span><strong>Status:</strong> Active Plan</span>
+        <span>${escapeHtml(studentName)}</span>
+        <span>${escapeHtml(generatedDate)}</span>
       </div>
     </div>
 
-    <div class="stats-grid">
+    <div class="stats-row">
       <div class="stat-box">
         <div class="stat-val">${progressPct}%</div>
-        <div class="stat-lbl">Overall Progress</div>
+        <div class="stat-lbl">Progress</div>
       </div>
       <div class="stat-box">
         <div class="stat-val">${completedMilestones} / ${totalMilestones}</div>
-        <div class="stat-lbl">Milestones Done</div>
+        <div class="stat-lbl">Completed</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val">${roadmap.estimated_weeks || 12} Weeks</div>
-        <div class="stat-lbl">Estimated Duration</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val">Adaptive</div>
-        <div class="stat-lbl">Curriculum Type</div>
+        <div class="stat-val">${roadmap.estimated_weeks || 8} Weeks</div>
+        <div class="stat-lbl">Duration</div>
       </div>
     </div>
 
-    <div class="content-body">
+    <div>
       ${milestonesSectionsHtml}
     </div>
 
     <div class="doc-footer">
-      <p>Generated by CareerVector AI • Personalized Career Acceleration Engine • https://careervector-sepia.vercel.app</p>
+      <p>Generated by CareerVector AI • https://careervector-sepia.vercel.app</p>
     </div>
   </div>
 
@@ -686,7 +542,7 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
     window.onload = function() {
       setTimeout(function() {
         window.print();
-      }, 500);
+      }, 400);
     };
   </script>
 </body>
@@ -702,149 +558,132 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
           <AiOrb size="md" pulse={true} />
-          <span className="text-xs text-[#6F7782] font-normal">Loading your personalized roadmap...</span>
+          <span className="text-xs text-[#6F7782] font-normal">Loading your roadmap...</span>
         </div>
       </div>
     );
   }
 
   const milestones = roadmap?.milestones || [];
+  const totalCount = milestones.length;
+  const completedCount = milestones.filter((m) => m.status === 'completed').length;
+  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
   const filteredMilestones = milestones.filter((m) => {
     if (statusFilter === 'all') return true;
     return m.status === statusFilter;
   });
 
-  // Group milestones by Phase
   const phases = ['Foundation', 'Intermediate', 'Capstone & Job-Ready'];
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Top Banner */}
-      <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-6 sm:p-7 shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-normal bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20 mb-2.5">
-            <MapPin className="w-3.5 h-3.5 text-[#536C8A]" />
-            <span>Adaptive Learning Roadmap</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-light text-[#17191C] tracking-tight">
-            Target Career: {roadmap?.target_career || 'Not Set'}
-          </h2>
-          <p className="text-xs text-[#6F7782] mt-1 font-light">
-            {roadmap?.completed_milestones} of {roadmap?.total_milestones} milestones completed ({roadmap?.progress_percentage}%)
+    <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Locked State */}
+      {roadmap?.is_locked || totalCount === 0 ? (
+        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-10 text-center max-w-lg mx-auto shadow-soft">
+          <AiOrb size="md" pulse={true} className="mx-auto mb-4" />
+          <h3 className="text-lg font-normal text-[#17191C] mb-2">Roadmap is Locked</h3>
+          <p className="text-xs text-[#6F7782] mb-6 leading-relaxed font-light">
+            Complete your Skill Assessment to generate your personalized step-by-step learning roadmap.
           </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           <button
-            onClick={handleRecalibrate}
-            disabled={recalibrating}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-normal bg-[#F9F9FB] text-[#17191C] hover:bg-white border border-[#E4E5E9] transition disabled:opacity-40 cursor-pointer"
+            onClick={() => onNavigate && onNavigate('/assessment')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#536C8A]" />
-            <span>{recalibrating ? 'Re-calibrating...' : 'Update Plan (AI Adapt)'}</span>
+            <span>Start Skill Assessment</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
-
-          <button
-            onClick={handleExportPDF}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export Roadmap (PDF)</span>
-          </button>
-        </div>
-      </div>
-
-      {message && (
-        <div className="p-3.5 bg-white border border-[#E4E5E9] rounded-2xl flex items-center gap-2.5 text-xs text-[#17191C] shadow-soft">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-[#536C8A]" />
-          <span className="font-light">{message.text}</span>
-        </div>
-      )}
-
-      {/* If roadmap is locked or milestones empty */}
-      {roadmap?.is_locked || milestones.length === 0 ? (
-        <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-12 text-center max-w-2xl mx-auto shadow-soft">
-          <AiOrb size="lg" pulse={true} className="mx-auto mb-4" />
-          <h3 className="text-xl font-light text-[#17191C] mb-2">Adaptive Learning Roadmap is Protected</h3>
-          <p className="text-xs sm:text-sm text-[#6F7782] max-w-md mx-auto mb-6 leading-relaxed font-light">
-            {roadmap?.lock_reason ||
-              'Your personalized week-by-week execution plan requires your skill assessment and career analysis to be completed first.'}
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={() => onNavigate && onNavigate('/assessment')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>1. Complete Skill Assessment</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => onNavigate && onNavigate('/careers')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-normal bg-[#F9F9FB] text-[#17191C] hover:bg-white border border-[#E4E5E9] transition cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#536C8A]" />
-              <span>2. AI Career Match & Chat</span>
-            </button>
-          </div>
         </div>
       ) : (
         <>
-          {/* Filter Tabs */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          {/* Top Banner */}
+          <div className="bg-white rounded-[20px] border border-[#E4E5E9] p-6 shadow-soft">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-normal text-[#17191C] tracking-tight">
+                  {roadmap?.target_career || 'Learning'} Roadmap
+                </h2>
+                <p className="text-xs text-[#6F7782] mt-1 font-light">
+                  8-week step-by-step curriculum with hands-on projects and free learning resources
+                </p>
+              </div>
+
               <button
-                onClick={() => setStatusFilter('all')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-normal transition ${
-                  statusFilter === 'all'
-                    ? 'bg-[#17191C] text-white'
-                    : 'bg-white text-[#6F7782] border border-[#E4E5E9] hover:bg-[#F9F9FB]'
-                }`}
+                onClick={handleExportPDF}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer shrink-0"
               >
-                All Milestones ({milestones.length})
+                <Download className="w-3.5 h-3.5" />
+                <span>Export PDF</span>
               </button>
-              <button
-                onClick={() => setStatusFilter('in_progress')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-normal transition ${
-                  statusFilter === 'in_progress'
-                    ? 'bg-[#536C8A] text-white'
-                    : 'bg-white text-[#6F7782] border border-[#E4E5E9] hover:bg-[#F9F9FB]'
-                }`}
-              >
-                In Progress
-              </button>
-              <button
-                onClick={() => setStatusFilter('completed')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-normal transition ${
-                  statusFilter === 'completed'
-                    ? 'bg-[#536C8A] text-white'
-                    : 'bg-white text-[#6F7782] border border-[#E4E5E9] hover:bg-[#F9F9FB]'
-                }`}
-              >
-                Completed
-              </button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-5 pt-4 border-t border-[#E4E5E9]/60">
+              <div className="flex items-center justify-between text-xs mb-2">
+                <span className="text-[#17191C] font-normal">
+                  {completedCount} of {totalCount} weeks completed
+                </span>
+                <span className="font-mono text-[#536C8A] font-normal">{progressPct}%</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-[#F1F3F5] overflow-hidden">
+                <div
+                  className="h-full bg-[#536C8A] rounded-full transition-all duration-300"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
             </div>
           </div>
 
+          {/* Simple Filter Tabs */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-normal transition cursor-pointer ${
+                statusFilter === 'all'
+                  ? 'bg-[#17191C] text-white'
+                  : 'bg-white text-[#6F7782] border border-[#E4E5E9] hover:bg-[#F9F9FB]'
+              }`}
+            >
+              All Weeks ({totalCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('in_progress')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-normal transition cursor-pointer ${
+                statusFilter === 'in_progress'
+                  ? 'bg-[#536C8A] text-white'
+                  : 'bg-white text-[#6F7782] border border-[#E4E5E9] hover:bg-[#F9F9FB]'
+              }`}
+            >
+              In Progress
+            </button>
+            <button
+              onClick={() => setStatusFilter('completed')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-normal transition cursor-pointer ${
+                statusFilter === 'completed'
+                  ? 'bg-[#536C8A] text-white'
+                  : 'bg-white text-[#6F7782] border border-[#E4E5E9] hover:bg-[#F9F9FB]'
+              }`}
+            >
+              Completed ({completedCount})
+            </button>
+          </div>
+
           {/* Milestones grouped by phase */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {phases.map((phaseName) => {
               const phaseMilestones = filteredMilestones.filter((m) =>
-                m.phase.toLowerCase().includes(phaseName.toLowerCase().split(' ')[0])
+                (m.phase || '').toLowerCase().includes(phaseName.toLowerCase().split(' ')[0])
               );
 
               if (phaseMilestones.length === 0) return null;
 
               return (
-                <div key={phaseName} className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[#536C8A]" />
-                    <h3 className="text-xs font-normal uppercase tracking-wider text-[#6F7782]">
-                      Phase: {phaseName}
-                    </h3>
-                  </div>
+                <div key={phaseName} className="space-y-3">
+                  <h3 className="text-xs font-normal uppercase tracking-wider text-[#6F7782] px-1">
+                    {phaseName}
+                  </h3>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {phaseMilestones.map((m) => {
                       const isCompleted = m.status === 'completed';
                       const isInProgress = m.status === 'in_progress';
@@ -852,151 +691,93 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
                       return (
                         <div
                           key={m.id}
-                          className={`bg-white rounded-[22px] border p-6 transition-all duration-200 shadow-soft ${
+                          className={`bg-white rounded-[18px] border p-5 transition-all shadow-soft ${
                             isCompleted
-                              ? 'border-[#E4E5E9] bg-white'
+                              ? 'border-[#E4E5E9] bg-white opacity-90'
                               : isInProgress
                               ? 'border-[#536C8A] ring-1 ring-[#536C8A]/20'
                               : 'border-[#E4E5E9]'
                           }`}
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                            <div className="flex items-start gap-3.5">
-                              <button
-                                onClick={() => handleToggleStatus(m)}
-                                className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition ${
-                                  isCompleted
-                                    ? 'bg-[#536C8A] text-white'
-                                    : isInProgress
-                                    ? 'border-2 border-[#536C8A] text-transparent hover:bg-[#536C8A]/10'
-                                    : 'border-2 border-[#E4E5E9] text-transparent hover:bg-[#F9F9FB]'
-                                }`}
-                              >
-                                <CheckCircle2 className="w-4 h-4" />
-                              </button>
-
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-mono text-xs font-normal text-[#6F7782]">
-                                    Week {m.week_number}
-                                  </span>
-                                  <h4 className="text-base font-normal text-[#17191C] leading-snug">
-                                    {m.title}
-                                  </h4>
-                                </div>
-                                <p className="text-xs text-[#6F7782] font-light mt-1 max-w-2xl leading-relaxed">
-                                  {m.description}
-                                </p>
+                          {/* Card Header */}
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] border border-[#E4E5E9] text-[#536C8A]">
+                                  Week {m.week_number}
+                                </span>
+                                <h4 className="text-sm sm:text-base font-normal text-[#17191C]">
+                                  {m.title}
+                                </h4>
                               </div>
+                              <p className="text-xs text-[#6F7782] font-light leading-relaxed">
+                                {m.description}
+                              </p>
                             </div>
 
-                            <span
-                              className={`text-xs font-normal px-3 py-1 rounded-full self-start shrink-0 border ${
+                            <button
+                              onClick={() => handleToggleStatus(m)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-normal transition shrink-0 cursor-pointer ${
                                 isCompleted
-                                  ? 'bg-[#536C8A]/10 text-[#536C8A] border-[#536C8A]/20'
+                                  ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9] hover:bg-[#C8E6C9]'
                                   : isInProgress
-                                  ? 'bg-[#F9F9FB] text-[#17191C] border-[#E4E5E9]'
-                                  : 'bg-[#F9F9FB] text-[#6F7782] border-[#E4E5E9]'
+                                  ? 'bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20 hover:bg-[#536C8A] hover:text-white'
+                                  : 'bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9] hover:bg-white hover:text-[#17191C]'
                               }`}
                             >
-                              {isCompleted ? 'Completed' : isInProgress ? 'In Progress' : 'Pending'}
-                            </span>
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{isCompleted ? 'Completed' : 'Mark as Done'}</span>
+                            </button>
                           </div>
 
-                          {/* Key Topics List */}
-                          <div className="mt-5 pt-4 border-t border-[#E4E5E9]/60">
-                            <span className="text-[11px] font-normal text-[#6F7782] uppercase tracking-wider block mb-2">
-                              Core Competencies:
-                            </span>
-                            <div className="flex flex-wrap gap-2">
-                              {m.topics.map((top, tIdx) => {
-                                const name = typeof top === 'string' ? top : top.name;
-                                return (
-                                  <span
-                                    key={tIdx}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-light bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9]"
-                                  >
-                                    <CheckCircle2 className="w-3 h-3 text-[#536C8A]" />
-                                    <span>{name}</span>
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Hands-On Mini-Project Specification */}
-                          <div className="mt-4 p-4.5 rounded-2xl bg-[#F9F9FB] border border-[#E4E5E9] text-xs">
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="font-normal text-[#17191C] flex items-center gap-1.5">
-                                <FolderGit2 className="w-4 h-4 text-[#536C8A]" />
-                                Hands-On Mini-Project Specification:
+                          {/* Key Topics */}
+                          {m.topics && m.topics.length > 0 && (
+                            <div className="mt-3.5 pt-3 border-t border-[#E4E5E9]/60">
+                              <span className="text-[11px] text-[#6F7782] font-light block mb-1.5">
+                                What you'll learn:
                               </span>
-                              {m.project_github_url && (
-                                <a
-                                  href={m.project_github_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-[#536C8A] hover:underline flex items-center gap-1 text-[11px] font-normal"
-                                >
-                                  <GitBranch className="w-3.5 h-3.5" />
-                                  View Submitted Repo
-                                </a>
-                              )}
+                              <div className="flex flex-wrap gap-1.5">
+                                {m.topics.map((top, tIdx) => {
+                                  const name = typeof top === 'string' ? top : top.name;
+                                  return (
+                                    <span
+                                      key={tIdx}
+                                      className="px-2.5 py-1 rounded-md text-xs font-light bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9]"
+                                    >
+                                      {name}
+                                    </span>
+                                  );
+                                })}
+                              </div>
                             </div>
-                            <p className="text-[#6F7782] font-light leading-relaxed">
-                              {m.project_prompt}
-                            </p>
+                          )}
 
-                            {/* GitHub Submission Input Box */}
-                            {editingMilestoneId === m.id ? (
-                              <div className="mt-3 flex items-center gap-2">
-                                <input
-                                  type="url"
-                                  value={githubUrlInput}
-                                  onChange={(e) => setGithubUrlInput(e.target.value)}
-                                  placeholder="https://github.com/username/project-repo"
-                                  className="px-3.5 py-2 text-xs rounded-xl border border-[#E4E5E9] bg-white w-full outline-none text-[#17191C] focus:border-[#536C8A]"
-                                />
-                                <button
-                                  onClick={() => handleSaveGithubUrl(m.id)}
-                                  className="px-4 py-2 rounded-xl text-xs font-normal bg-[#536C8A] text-white shrink-0 hover:bg-[#193D50] transition shadow-soft"
-                                >
-                                  Submit Repo
-                                </button>
-                                <button
-                                  onClick={() => setEditingMilestoneId(null)}
-                                  className="px-3 py-2 rounded-xl text-xs text-[#6F7782] hover:text-[#17191C]"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="mt-3 flex items-center gap-3">
-                                <button
-                                  onClick={() => {
-                                    setEditingMilestoneId(m.id);
-                                    setGithubUrlInput(m.project_github_url || '');
-                                  }}
-                                  className="text-[#536C8A] hover:text-[#193D50] font-normal flex items-center gap-1 text-xs"
-                                >
-                                  <GitBranch className="w-3.5 h-3.5" />
-                                  {m.project_github_url ? 'Update GitHub Link' : 'Submit Project GitHub URL'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          {/* Weekly Project */}
+                          {m.project_prompt && (
+                            <div className="mt-3 p-3 rounded-xl bg-[#F9F9FB] border border-[#E4E5E9] text-xs">
+                              <span className="font-normal text-[#17191C] block mb-1">
+                                Weekly Practice Project:
+                              </span>
+                              <p className="text-[#6F7782] font-light leading-relaxed">
+                                {m.project_prompt}
+                              </p>
+                            </div>
+                          )}
 
-                          {/* Curated Free Resources */}
+                          {/* Recommended Resources */}
                           {m.resource_links && m.resource_links.length > 0 && (
-                            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-                              <span className="text-[#6F7782] font-light">Curated Resources:</span>
+                            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                              <span className="text-[#6F7782] font-light flex items-center gap-1">
+                                <BookOpen className="w-3.5 h-3.5 text-[#536C8A]" />
+                                Resources:
+                              </span>
                               {m.resource_links.map((res, rIdx) => (
                                 <a
                                   key={rIdx}
                                   href={res.url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white hover:bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9] transition font-light"
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white hover:bg-[#F9F9FB] text-[#536C8A] border border-[#E4E5E9] transition font-light"
                                 >
                                   <span>{res.title}</span>
                                   <ExternalLink className="w-3 h-3 text-[#6F7782]" />

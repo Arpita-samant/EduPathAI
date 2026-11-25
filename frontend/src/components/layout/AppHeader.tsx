@@ -32,7 +32,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ currentRoute, onOpenSideba
       case '/profile': return { title: 'Smart Profile', subtitle: 'Academic records, verified technical stack & portfolio projects' };
       case '/assessment': return { title: 'Skill Assessment', subtitle: 'Multi-dimensional evaluation & core superpower selection' };
       case '/careers': return { title: 'AI Career Match & Mentor', subtitle: 'Single best-fit career analysis & conversational AI advisor' };
-      case '/roadmap': return { title: 'Adaptive Learning Roadmap', subtitle: 'Structured weekly execution plan & capstone milestones' };
+      case '/roadmap': return { title: 'Learning Roadmap', subtitle: 'Step-by-step weekly guide and practical projects' };
       case '/jobs': return { title: 'Live Opportunities Feed', subtitle: 'Real-time multi-API stream from Jobicy, Arbeitnow, Himalayas & Adzuna' };
       case '/resume-ats': return { title: 'AI Resume ATS Analyzer', subtitle: 'Keyword matching, format audits & STAR bullet rewrites' };
       case '/resources': return { title: 'Curated Free Hub', subtitle: 'High-signal courses, documentation & interactive practice' };
