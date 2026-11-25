@@ -177,15 +177,32 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
 
         {/* Filters & Search Toolbar */}
         <div className="mt-4 flex flex-col sm:flex-row flex-wrap gap-3">
-          <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[220px] relative">
-            <Search className="w-4 h-4 text-[#6F7782]/60 absolute left-3.5 top-3" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search companies, job titles, or specific technologies..."
-              className="w-full pl-10 pr-4 py-2.5 text-xs text-[#17191C] placeholder-[#6F7782]/50 rounded-2xl border border-[#E4E5E9] focus:border-[#536C8A] outline-none bg-white transition"
-            />
+          <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[240px] flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-[#6F7782]/60 absolute left-3.5 top-3" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search domain, role, company, or skills (e.g. React, Python, Cloud)..."
+                className="w-full pl-10 pr-8 py-2.5 text-xs text-[#17191C] placeholder-[#6F7782]/50 rounded-2xl border border-[#E4E5E9] focus:border-[#536C8A] outline-none bg-white transition"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => { setSearch(''); setTimeout(() => fetchJobs(), 0); }}
+                  className="absolute right-3 top-3 text-[#6F7782] hover:text-[#17191C]"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2.5 rounded-2xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer shrink-0"
+            >
+              Search
+            </button>
           </form>
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
@@ -194,11 +211,16 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
               onChange={(e) => setDomainFilter(e.target.value)}
               className="flex-1 sm:flex-none px-3.5 py-2.5 text-xs rounded-2xl border border-[#E4E5E9] bg-white text-[#17191C] outline-none"
             >
-              <option value="">All Domains</option>
+              <option value="">All Domains & Fields</option>
               <option value="Software">Software Engineering</option>
+              <option value="Frontend">Frontend & Web</option>
+              <option value="Backend">Backend & Systems</option>
               <option value="AI">AI / Machine Learning</option>
-              <option value="Data">Data Science</option>
+              <option value="Data">Data Science & Analytics</option>
               <option value="Cloud">Cloud & DevOps</option>
+              <option value="Mobile">Mobile (iOS & Android)</option>
+              <option value="Security">Cybersecurity</option>
+              <option value="Design">Product & UI/UX</option>
             </select>
 
             <select
@@ -220,16 +242,21 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
       {jobs.length === 0 && !loading ? (
         <div className="bg-white rounded-[24px] border border-[#E4E5E9] p-12 text-center max-w-xl mx-auto shadow-soft">
           <AiOrb size="md" pulse={true} className="mx-auto mb-4" />
-          <h3 className="text-lg font-normal text-[#17191C] mb-1">No Matching Real-Time Roles Found</h3>
+          <h3 className="text-lg font-normal text-[#17191C] mb-1">No Opportunities Found for Selected Filters</h3>
           <p className="text-xs text-[#6F7782] max-w-sm mx-auto mb-5 leading-relaxed font-light">
-            Ensure you have added technical skills to your profile so our real-time matching algorithm can score jobs against your background.
+            No live listings match your current search terms or domain filter. Reset filters to view all live roles across Jobicy, Arbeitnow, Himalayas, and Adzuna.
           </p>
           <button
-            onClick={() => onNavigate('/profile')}
+            onClick={() => {
+              setSearch('');
+              setDomainFilter('');
+              setRoleTypeFilter('');
+              setSourceFilter('all');
+            }}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer"
           >
-            <span>Complete Profile & Add Skills</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Reset All Filters & Show All Live Roles</span>
           </button>
         </div>
       ) : (
@@ -240,12 +267,19 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
               className="bg-white rounded-[22px] border border-[#E4E5E9] p-5.5 hover:border-[#A8B9D0]/60 shadow-soft transition flex flex-col justify-between"
             >
               <div>
-                {/* Header: Company & Source Badge */}
+                {/* Header: Company, Source & Domain */}
                 <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <span className={`text-[10px] font-normal uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getSourceBadgeStyle(job.source)}`}>
-                    {job.source || 'Live Feed'}
-                  </span>
-                  <div className="flex items-center gap-1.5 font-mono text-xs font-normal text-[#17191C] bg-[#F9F9FB] px-2.5 py-0.5 rounded-full border border-[#E4E5E9]">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`text-[10px] font-normal uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getSourceBadgeStyle(job.source)}`}>
+                      {job.source || 'Live Feed'}
+                    </span>
+                    {job.domain && (
+                      <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#536C8A] border border-[#E4E5E9] truncate max-w-[130px]" title={job.domain}>
+                        {job.domain}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 font-mono text-xs font-normal text-[#17191C] bg-[#F9F9FB] px-2.5 py-0.5 rounded-full border border-[#E4E5E9] shrink-0">
                     <AiOrb size="xs" />
                     <span>{job.match_percentage}%</span>
                   </div>
@@ -270,8 +304,18 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                   </div>
                 </div>
 
+                {/* Badges: Role Type & Experience */}
+                <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9]">
+                    {job.role_type || 'Full-Time'}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9]">
+                    {job.experience_level || 'Entry / Mid'}
+                  </span>
+                </div>
+
                 {/* Location & Salary */}
-                <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-[#6F7782] font-light">
+                <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] text-[#6F7782] font-light">
                   <span className="flex items-center gap-1 truncate max-w-[150px]">
                     <MapPin className="w-3 h-3 text-[#6F7782]/60 shrink-0" />
                     <span className="truncate">{job.location}</span>
@@ -363,10 +407,15 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                   <div className="text-xs font-normal text-[#536C8A] mt-0.5">
                     {selectedJob.company}
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-[#6F7782] font-light mt-1">
-                    <span>{selectedJob.location}</span>
-                    <span>•</span>
-                    <span className="text-[#17191C]">{selectedJob.salary_range}</span>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-[#6F7782] font-light mt-1.5">
+                    <span className="px-2 py-0.5 rounded-md bg-[#F9F9FB] border border-[#E4E5E9] text-[#17191C]">{selectedJob.location}</span>
+                    <span className="px-2 py-0.5 rounded-md bg-[#F9F9FB] border border-[#E4E5E9] text-[#17191C]">{selectedJob.salary_range}</span>
+                    {selectedJob.domain && (
+                      <span className="px-2 py-0.5 rounded-md bg-[#536C8A]/10 border border-[#536C8A]/20 text-[#536C8A] font-normal">{selectedJob.domain}</span>
+                    )}
+                    {selectedJob.experience_level && (
+                      <span className="px-2 py-0.5 rounded-md bg-[#F9F9FB] border border-[#E4E5E9] text-[#6F7782]">{selectedJob.experience_level}</span>
+                    )}
                   </div>
                 </div>
 
@@ -397,6 +446,24 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
 
               {/* Skills Breakdown */}
               <div className="space-y-3 mb-6">
+                {selectedJob.required_skills && selectedJob.required_skills.length > 0 && (
+                  <div>
+                    <span className="text-xs font-normal text-[#17191C] block mb-1.5">
+                      All Key Role Skills ({selectedJob.required_skills.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedJob.required_skills.map((s) => (
+                        <span
+                          key={s}
+                          className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9]"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <span className="text-xs font-normal text-[#17191C] block mb-1.5">
                     Skills You Match ({selectedJob.matched_skills.length}):

@@ -115,8 +115,586 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleExport = () => {
-    window.open(api.getExportUrl(), '_blank');
+  const escapeHtml = (str: string) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
+  const handleExportPDF = () => {
+    if (!roadmap) {
+      setMessage({ text: 'Roadmap data is not loaded yet.', type: 'info' });
+      return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=960,height=850');
+    if (!printWindow) {
+      alert('Please enable popups in your browser to export your roadmap as a PDF.');
+      return;
+    }
+
+    const studentName = user?.full_name || 'Student';
+    const studentEmail = user?.email || '';
+    const targetCareer = roadmap.target_career || 'Target Career';
+    const totalMilestones = roadmap.total_milestones || (roadmap.milestones?.length || 0);
+    const completedMilestones = roadmap.completed_milestones || 0;
+    const progressPct = roadmap.progress_percentage || Math.round((completedMilestones / (totalMilestones || 1)) * 100);
+    const generatedDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const milestones = roadmap.milestones || [];
+    const phases = ['Foundation', 'Intermediate', 'Capstone & Job-Ready'];
+
+    let milestonesSectionsHtml = '';
+
+    phases.forEach((phase) => {
+      const phaseMilestones = milestones.filter(
+        (m) => (m.phase || '').toLowerCase() === phase.toLowerCase() ||
+               (phase === 'Capstone & Job-Ready' && (m.phase || '').toLowerCase().includes('capstone'))
+      );
+      const itemsToRender = phaseMilestones.length > 0 ? phaseMilestones : (phase === 'Foundation' ? milestones : []);
+      if (itemsToRender.length === 0 && phaseMilestones.length === 0) return;
+
+      milestonesSectionsHtml += `
+        <div class="phase-section">
+          <div class="phase-title-badge">
+            <span>${escapeHtml(phase)} Phase</span>
+          </div>
+          <div class="milestones-grid">
+      `;
+
+      itemsToRender.forEach((m) => {
+        const isDone = m.status === 'completed';
+        const isCurrent = m.status === 'in_progress';
+        const statusLabel = isDone ? 'Completed' : (isCurrent ? 'In Progress' : 'Pending');
+        const statusBadgeClass = isDone ? 'badge-completed' : (isCurrent ? 'badge-progress' : 'badge-pending');
+
+        const topicsList = (m.topics || []).map((t: any) => {
+          const tName = typeof t === 'string' ? t : t.name;
+          const tDone = typeof t === 'object' && t.completed;
+          return `
+            <li class="topic-item ${tDone ? 'topic-done' : ''}">
+              <span class="topic-icon">${tDone ? '✓' : '•'}</span>
+              <span>${escapeHtml(tName)}</span>
+            </li>
+          `;
+        }).join('');
+
+        const resourcesList = (m.resource_links || []).map((r: any) => `
+          <a href="${escapeHtml(r.url || '#')}" target="_blank" class="resource-link">
+            ${escapeHtml(r.title || 'Resource')} <span class="res-tag">(${escapeHtml(r.type || 'Guide')})</span>
+          </a>
+        `).join('');
+
+        milestonesSectionsHtml += `
+          <div class="milestone-card ${isCurrent ? 'current-card' : ''}">
+            <div class="milestone-header">
+              <div class="milestone-meta">
+                <span class="week-pill">Week ${m.week_number}</span>
+                <span class="phase-label">${escapeHtml(m.phase || phase)}</span>
+              </div>
+              <span class="status-badge ${statusBadgeClass}">${statusLabel}</span>
+            </div>
+
+            <h3 class="milestone-title">${escapeHtml(m.title)}</h3>
+            <p class="milestone-desc">${escapeHtml(m.description || '')}</p>
+
+            ${topicsList ? `
+              <div class="section-group">
+                <div class="group-title">Key Learning Topics:</div>
+                <ul class="topics-list">${topicsList}</ul>
+              </div>
+            ` : ''}
+
+            ${m.project_prompt ? `
+              <div class="section-group project-box">
+                <div class="group-title">Hands-on Practical Project:</div>
+                <div class="project-text">${escapeHtml(m.project_prompt)}</div>
+                ${m.project_github_url ? `
+                  <div class="github-link">
+                    <strong>Submitted GitHub Repo:</strong>
+                    <span>${escapeHtml(m.project_github_url)}</span>
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+
+            ${resourcesList ? `
+              <div class="section-group">
+                <div class="group-title">Curated Free Learning Resources:</div>
+                <div class="resources-flex">${resourcesList}</div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      milestonesSectionsHtml += `
+          </div>
+        </div>
+      `;
+    });
+
+    if (!milestonesSectionsHtml && milestones.length > 0) {
+      milestonesSectionsHtml = milestones.map((m) => `
+        <div class="milestone-card">
+          <div class="milestone-header">
+            <span class="week-pill">Week ${m.week_number}</span>
+            <span class="status-badge badge-${m.status}">${m.status}</span>
+          </div>
+          <h3 class="milestone-title">${escapeHtml(m.title)}</h3>
+          <p class="milestone-desc">${escapeHtml(m.description || '')}</p>
+        </div>
+      `).join('');
+    }
+
+    const printHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CareerVector Roadmap - ${escapeHtml(targetCareer)}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #17191C;
+      background: #F9F9FB;
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 36px 40px;
+      border-radius: 16px;
+      border: 1px solid #E4E5E9;
+    }
+
+    .action-bar {
+      position: sticky;
+      top: 0;
+      max-width: 860px;
+      margin: 0 auto 20px auto;
+      background: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid #E4E5E9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+
+    .action-bar .tip {
+      font-size: 13px;
+      color: #6F7782;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #536C8A;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #193D50;
+    }
+
+    .btn-secondary {
+      background: #F9F9FB;
+      color: #17191C;
+      border: 1px solid #E4E5E9;
+    }
+
+    .doc-header {
+      border-bottom: 2px solid #E4E5E9;
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #536C8A;
+      letter-spacing: -0.5px;
+    }
+
+    .doc-badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #536C8A;
+      background: rgba(83, 108, 138, 0.08);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 1px solid rgba(83, 108, 138, 0.2);
+    }
+
+    .main-title {
+      font-size: 26px;
+      font-weight: 600;
+      color: #17191C;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .sub-meta {
+      font-size: 13px;
+      color: #6F7782;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .stat-box {
+      background: #F9F9FB;
+      border: 1px solid #E4E5E9;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: #17191C;
+      margin-bottom: 2px;
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: #6F7782;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .phase-section {
+      margin-bottom: 28px;
+    }
+
+    .phase-title-badge {
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .phase-title-badge span {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #536C8A;
+      border-bottom: 2px solid #536C8A;
+      padding-bottom: 4px;
+    }
+
+    .milestones-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .milestone-card {
+      border: 1px solid #E4E5E9;
+      border-radius: 12px;
+      padding: 20px;
+      background: #ffffff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .milestone-card.current-card {
+      border-color: #536C8A;
+      box-shadow: 0 2px 8px rgba(83, 108, 138, 0.08);
+    }
+
+    .milestone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .milestone-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .week-pill {
+      font-size: 11px;
+      font-weight: 600;
+      background: #17191C;
+      color: white;
+      padding: 2px 10px;
+      border-radius: 9999px;
+    }
+
+    .phase-label {
+      font-size: 12px;
+      color: #6F7782;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }
+
+    .badge-completed {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+
+    .badge-progress {
+      background: rgba(83, 108, 138, 0.12);
+      color: #536C8A;
+    }
+
+    .badge-pending {
+      background: #F1F3F5;
+      color: #6F7782;
+    }
+
+    .milestone-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #17191C;
+      margin-bottom: 8px;
+    }
+
+    .milestone-desc {
+      font-size: 13px;
+      color: #555E68;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .section-group {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #E4E5E9;
+    }
+
+    .group-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #17191C;
+      margin-bottom: 6px;
+    }
+
+    .topics-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .topic-item {
+      font-size: 12px;
+      color: #4A5568;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topic-done {
+      color: #2E7D32;
+      text-decoration: line-through;
+    }
+
+    .topic-icon {
+      font-weight: bold;
+      color: #536C8A;
+    }
+
+    .project-box {
+      background: #F9F9FB;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      border-top: none;
+      border: 1px solid #E4E5E9;
+    }
+
+    .project-text {
+      font-size: 12px;
+      color: #2D3748;
+      line-height: 1.5;
+    }
+
+    .github-link {
+      font-size: 11px;
+      color: #536C8A;
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    .resources-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .resource-link {
+      font-size: 11px;
+      color: #536C8A;
+      text-decoration: none;
+      background: #F9F9FB;
+      border: 1px solid #E4E5E9;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .res-tag {
+      color: #6F7782;
+      font-size: 10px;
+    }
+
+    .doc-footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid #E4E5E9;
+      text-align: center;
+      font-size: 11px;
+      color: #6F7782;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .container {
+        border: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .milestone-card {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 15mm 12mm 15mm 12mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="action-bar">
+    <span class="tip"><strong>Tip:</strong> In the print destination dialog, select <strong>Save as PDF</strong> to download your roadmap.</span>
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="window.print()">Save as PDF / Print</button>
+      <button class="btn btn-secondary" onclick="window.close()">Close</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="doc-header">
+      <div class="brand-row">
+        <span class="brand-name">CareerVector AI</span>
+        <span class="doc-badge">Official Learning Roadmap</span>
+      </div>
+      <h1 class="main-title">${escapeHtml(targetCareer)}</h1>
+      <div class="sub-meta">
+        <span><strong>Student:</strong> ${escapeHtml(studentName)} (${escapeHtml(studentEmail)})</span>
+        <span><strong>Date Generated:</strong> ${escapeHtml(generatedDate)}</span>
+        <span><strong>Status:</strong> Active Plan</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-val">${progressPct}%</div>
+        <div class="stat-lbl">Overall Progress</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">${completedMilestones} / ${totalMilestones}</div>
+        <div class="stat-lbl">Milestones Done</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">${roadmap.estimated_weeks || 12} Weeks</div>
+        <div class="stat-lbl">Estimated Duration</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">Adaptive</div>
+        <div class="stat-lbl">Curriculum Type</div>
+      </div>
+    </div>
+
+    <div class="content-body">
+      ${milestonesSectionsHtml}
+    </div>
+
+    <div class="doc-footer">
+      <p>Generated by CareerVector AI • Personalized Career Acceleration Engine • https://careervector-sepia.vercel.app</p>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
   };
 
   if (loading && !roadmap) {
@@ -167,11 +745,11 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({ onNavigate }) => {
           </button>
 
           <button
-            onClick={handleExport}
+            onClick={handleExportPDF}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Export Roadmap</span>
+            <span>Export Roadmap (PDF)</span>
           </button>
         </div>
       </div>

@@ -1,9 +1,14 @@
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas, auth
+from app.config import settings
+try:
+    import jwt
+except ImportError:
+    from jose import jwt
 from app.ai_service import generate_roadmap
 
 router = APIRouter(prefix="/roadmap", tags=["Learning Roadmap & Milestones"])
@@ -206,9 +211,24 @@ def recalibrate_roadmap(
 
 @router.get("/export")
 def export_roadmap_markdown(
-    current_user: models.User = Depends(auth.get_current_user),
+    token: Optional[str] = Query(None),
+    raw_token: Optional[str] = Depends(auth.oauth2_scheme),
     db: Session = Depends(get_db)
 ):
+    t = raw_token or token
+    if not t:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        payload = jwt.decode(t, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    current_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not current_user:
+        raise HTTPException(status_code=401, detail="User not found")
     roadmap = db.query(models.Roadmap).filter(
         models.Roadmap.user_id == current_user.id,
         models.Roadmap.is_active == True

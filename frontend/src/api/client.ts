@@ -74,7 +74,10 @@ export const api = {
   updateMilestone: (id: string, status: string, project_github_url?: string) => 
     request<any>(`/roadmap/milestones/${id}`, { method: 'PATCH', body: JSON.stringify({ status, project_github_url }) }),
   recalibrateRoadmap: (feedback_notes?: string) => request<any>('/roadmap/recalibrate', { method: 'POST', body: JSON.stringify({ feedback_notes }) }),
-  getExportUrl: () => `${API_BASE}/roadmap/export`,
+  getExportUrl: () => {
+    const token = localStorage.getItem('token');
+    return `${API_BASE}/roadmap/export${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  },
 
   // Jobs
   getJobMatches: (params?: { source?: string; domain?: string; role_type?: string; experience_level?: string; search?: string }) => {

@@ -406,11 +406,16 @@ def get_aggregated_live_jobs(
             else:
                 missing.append(req)
                 
-        if req_skills:
+        if user_skills and req_skills:
             pct = round((len(matched) / len(req_skills)) * 100)
-            match_percentage = min(96, max(30 if user_skills else 10, pct))
+            match_percentage = min(98, max(50, pct))
+        elif user_skills:
+            match_percentage = 75
         else:
-            match_percentage = 70 if user_skills else 20
+            # Not dependent on user profile: show live roles with high baseline readiness
+            match_percentage = 88
+            matched = req_skills[:3]
+            missing = req_skills[3:]
 
         j_copy = dict(j)
         j_copy["matched_skills"] = matched
@@ -425,7 +430,13 @@ def get_aggregated_live_jobs(
     # Filter by domain
     if domain_filter:
         d_lower = domain_filter.lower()
-        processed_jobs = [j for j in processed_jobs if d_lower in j.get("domain", "").lower() or d_lower in j.get("title", "").lower()]
+        processed_jobs = [
+            j for j in processed_jobs
+            if d_lower in j.get("domain", "").lower()
+            or d_lower in j.get("title", "").lower()
+            or any(d_lower in s.lower() for s in j.get("required_skills", []))
+            or d_lower in j.get("description", "").lower()
+        ]
 
     # Filter by search
     if search_query:

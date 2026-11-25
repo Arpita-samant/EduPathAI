@@ -46,20 +46,7 @@ def get_job_matches(
     profile = db.query(models.StudentProfile).filter(models.StudentProfile.user_id == current_user.id).first()
     user_skill_names = [s.get("name", "") for s in (profile.technical_skills or [])] if profile else []
 
-    # Return empty matches until user completes profile steps (adds skills or selects a target career)
-    if not user_skill_names and not (profile and profile.target_career):
-        return {
-            "jobs": [],
-            "total": 0,
-            "active_sources": [
-                {"name": "Jobicy", "status": "Ready", "count": 0, "url": "https://jobicy.com/api/v2/remote-jobs"},
-                {"name": "Arbeitnow", "status": "Ready", "count": 0, "url": "https://www.arbeitnow.com/api/job-board-api"},
-                {"name": "Himalayas", "status": "Ready", "count": 0, "url": "https://himalayas.app/jobs/api"},
-                {"name": "Adzuna", "status": "Key Configured", "count": 0, "url": "https://developer.adzuna.com"}
-            ]
-        }
-
-    # Fetch real-time live jobs from all 4 providers!
+    # Fetch real-time live jobs from all 4 providers (profile-independent)!
     live_jobs, sources_status = get_aggregated_live_jobs(
         user_skills=user_skill_names,
         source_filter=source,
