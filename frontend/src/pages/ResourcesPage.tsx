@@ -284,59 +284,59 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({ initialSkillFilter
             return (
               <div
                 key={res.id}
-                className={`bg-white rounded-[22px] border p-5.5 transition flex flex-col justify-between shadow-soft ${
+                className={`h-[295px] bg-white rounded-[22px] border p-5 transition flex flex-col justify-between shadow-soft ${
                   isDone
                     ? 'border-[#536C8A]/40 bg-[#F9F9FB]'
                     : 'border-[#E4E5E9] hover:border-[#A8B9D0]/60'
                 }`}
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#F9F9FB] border border-[#E4E5E9] text-[#6F7782]">
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="h-6 flex items-center justify-between gap-2 shrink-0">
+                    <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#F9F9FB] border border-[#E4E5E9] text-[#6F7782] truncate">
                       {res.resource_type}
                     </span>
-                    <div className="flex items-center gap-1 text-xs text-[#536C8A]">
+                    <div className="flex items-center gap-1 text-xs text-[#536C8A] shrink-0">
                       <Star className="w-3.5 h-3.5 fill-[#536C8A] text-[#536C8A]" />
                       <span className="font-mono">{res.rating || 4.8}</span>
                     </div>
                   </div>
 
-                  <h3 className="text-base font-normal text-[#17191C] mt-3 leading-snug">
+                  <h3 className="text-sm sm:text-base font-normal text-[#17191C] mt-2.5 leading-snug line-clamp-2 h-11 flex items-center shrink-0" title={res.title}>
                     {res.title}
                   </h3>
-                  <span className="text-xs text-[#6F7782] font-light block mt-1">
+                  <span className="text-xs text-[#6F7782] font-light block mt-1 truncate h-5 shrink-0">
                     Platform: <strong className="font-medium text-[#17191C]">{res.provider}</strong>
                   </span>
 
-                  <div className="flex flex-wrap items-center gap-1.5 mt-3 text-[11px]">
-                    <span className="font-mono px-2.5 py-0.5 rounded-full bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20">
+                  <div className="mt-auto pt-3 flex flex-wrap items-center gap-1.5 text-[11px] h-7 overflow-hidden shrink-0">
+                    <span className="font-mono px-2.5 py-0.5 rounded-full bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20 truncate max-w-[150px]" title={res.skill_tag}>
                       {res.skill_tag}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9]">
+                    <span className="px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9] shrink-0">
                       {res.difficulty}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-white text-[#2E7D32] border border-[#E4E5E9]">
+                    <span className="px-2 py-0.5 rounded-full bg-white text-[#2E7D32] border border-[#E4E5E9] shrink-0 font-medium">
                       100% Free
                     </span>
                   </div>
                 </div>
 
                 {/* Bottom Actions */}
-                <div className="mt-5 pt-3.5 border-t border-[#E4E5E9]/60 flex items-center justify-between gap-3">
+                <div className="mt-4 pt-3.5 border-t border-[#E4E5E9]/60 flex items-center justify-between gap-3 shrink-0">
                   <a
                     href={res.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl text-xs font-normal bg-[#536C8A] text-white hover:bg-[#193D50] transition shadow-soft truncate"
                   >
                     <span>Open Free Course</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                   </a>
 
                   <button
                     onClick={() => toggleCompleted(res.id)}
                     title={isDone ? 'Mark Incomplete' : 'Mark as Completed'}
-                    className={`p-2 rounded-xl border transition cursor-pointer ${
+                    className={`p-2 rounded-xl border transition cursor-pointer shrink-0 ${
                       isDone
                         ? 'bg-[#536C8A] text-white border-[#536C8A]'
                         : 'border-[#E4E5E9] text-[#6F7782] hover:text-[#17191C] hover:bg-[#F9F9FB]'

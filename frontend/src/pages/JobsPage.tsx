@@ -279,17 +279,17 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
           {displayedJobs.map((job) => (
             <div
               key={job.id}
-              className="bg-white rounded-[22px] border border-[#E4E5E9] p-5.5 hover:border-[#A8B9D0]/60 shadow-soft transition flex flex-col justify-between"
+              className="h-[395px] bg-white rounded-[22px] border border-[#E4E5E9] p-5 hover:border-[#A8B9D0]/60 shadow-soft transition flex flex-col justify-between"
             >
-              <div>
+              <div className="flex-1 flex flex-col min-h-0">
                 {/* Header: Company, Source & Domain */}
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className={`text-[10px] font-normal uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getSourceBadgeStyle(job.source)}`}>
+                <div className="h-6 flex items-center justify-between gap-2 mb-2 shrink-0">
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className={`text-[10px] font-normal uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${getSourceBadgeStyle(job.source)}`}>
                       {job.source || 'Live Feed'}
                     </span>
                     {job.domain && (
-                      <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#536C8A] border border-[#E4E5E9] truncate max-w-[130px]" title={job.domain}>
+                      <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#536C8A] border border-[#E4E5E9] truncate" title={job.domain}>
                         {job.domain}
                       </span>
                     )}
@@ -300,7 +300,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 mt-1">
+                {/* Company & Title */}
+                <div className="flex items-start gap-3 mt-1 shrink-0">
                   {job.company_logo ? (
                     <img
                       src={job.company_logo}
@@ -313,68 +314,68 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                     <span className="text-xs font-light text-[#6F7782] block truncate">
                       {job.company}
                     </span>
-                    <h3 className="text-sm font-normal text-[#17191C] leading-snug line-clamp-2">
+                    <h3 className="text-sm font-normal text-[#17191C] leading-snug line-clamp-2 h-10 flex items-center" title={job.title}>
                       {job.title}
                     </h3>
                   </div>
                 </div>
 
                 {/* Badges: Role Type & Experience */}
-                <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9]">
+                <div className="h-6 flex items-center gap-1.5 mt-2 shrink-0 overflow-hidden">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] text-[#17191C] border border-[#E4E5E9] shrink-0">
                     {job.role_type || 'Full-Time'}
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9]">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9] shrink-0 truncate">
                     {job.experience_level || 'Entry / Mid'}
                   </span>
                 </div>
 
                 {/* Location & Salary */}
-                <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] text-[#6F7782] font-light">
-                  <span className="flex items-center gap-1 truncate max-w-[150px]">
+                <div className="h-5 flex items-center gap-2 mt-2 text-[11px] text-[#6F7782] font-light shrink-0">
+                  <span className="flex items-center gap-1 truncate max-w-[130px]">
                     <MapPin className="w-3 h-3 text-[#6F7782]/60 shrink-0" />
                     <span className="truncate">{job.location}</span>
                   </span>
                   <span>•</span>
-                  <span className="flex items-center gap-1 text-[#17191C] truncate max-w-[160px]">
+                  <span className="flex items-center gap-1 text-[#17191C] truncate flex-1 min-w-0">
                     <DollarSign className="w-3 h-3 text-[#6F7782]/60 shrink-0" />
                     <span className="truncate">{job.salary_range}</span>
                   </span>
                 </div>
 
                 {/* Description Preview */}
-                <p className="text-xs text-[#6F7782] font-light mt-2.5 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-[#6F7782] font-light mt-2 line-clamp-2 h-9 leading-relaxed overflow-hidden shrink-0">
                   {job.description}
                 </p>
 
                 {/* Skill Overlap Badges */}
-                <div className="mt-3.5 pt-2.5 border-t border-[#E4E5E9]/60">
-                  <div className="flex flex-wrap gap-1">
-                    {job.matched_skills.slice(0, 3).map((s) => (
-                      <span
-                        key={s}
-                        className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20"
-                      >
-                        ✓ {s}
-                      </span>
-                    ))}
-                    {job.missing_skills.slice(0, 2).map((s) => (
-                      <span
-                        key={s}
-                        className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9]"
-                      >
-                        + {s}
-                      </span>
-                    ))}
-                  </div>
+                <div className="mt-auto pt-2 border-t border-[#E4E5E9]/60 h-8 flex items-center gap-1 overflow-hidden shrink-0">
+                  {job.matched_skills.slice(0, 3).map((s) => (
+                    <span
+                      key={s}
+                      className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#536C8A]/10 text-[#536C8A] border border-[#536C8A]/20 shrink-0 truncate max-w-[100px]"
+                      title={s}
+                    >
+                      ✓ {s}
+                    </span>
+                  ))}
+                  {job.missing_skills.slice(0, 2).map((s) => (
+                    <span
+                      key={s}
+                      className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F9F9FB] text-[#6F7782] border border-[#E4E5E9] shrink-0 truncate max-w-[90px]"
+                      title={s}
+                    >
+                      + {s}
+                    </span>
+                  ))}
                 </div>
               </div>
 
               {/* Bottom Actions */}
-              <div className="mt-4 pt-3 border-t border-[#E4E5E9]/60 flex items-center gap-2">
+              <div className="mt-3 pt-3 border-t border-[#E4E5E9]/60 flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setSelectedJob(job)}
-                  className="flex-1 py-2 px-3 text-xs font-normal rounded-xl bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition text-center cursor-pointer"
+                  className="flex-1 py-2 px-3 text-xs font-normal rounded-xl bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition text-center cursor-pointer truncate"
                 >
                   View Details & Gaps
                 </button>
@@ -384,7 +385,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Apply Directly"
-                    className="p-2 rounded-xl bg-[#536C8A]/10 hover:bg-[#536C8A]/20 text-[#536C8A] border border-[#536C8A]/20 transition"
+                    className="p-2 rounded-xl bg-[#536C8A]/10 hover:bg-[#536C8A]/20 text-[#536C8A] border border-[#536C8A]/20 transition shrink-0"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
@@ -392,7 +393,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                 <button
                   onClick={() => handleRunSkillGap(job)}
                   title="Run Skill Gap Analysis"
-                  className="p-2 rounded-xl border border-[#E4E5E9] hover:bg-[#F9F9FB] text-[#6F7782] transition cursor-pointer"
+                  className="p-2 rounded-xl border border-[#E4E5E9] hover:bg-[#F9F9FB] text-[#6F7782] transition cursor-pointer shrink-0"
                 >
                   <GitPullRequest className="w-3.5 h-3.5" />
                 </button>
