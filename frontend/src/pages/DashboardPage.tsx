@@ -104,11 +104,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <h2 className="text-xl sm:text-[26px] font-light text-[#17191C] tracking-tight">
                 Welcome back, {user?.full_name || 'Explorer'}
               </h2>
-              {user?.is_demo && (
-                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#C7B5D9]/20 text-[#536C8A] border border-[#C7B5D9]/30">
-                  Demo
-                </span>
-              )}
             </div>
             <p className="text-xs sm:text-sm text-[#6F7782] mt-1 font-normal">
               Target Career:{' '}

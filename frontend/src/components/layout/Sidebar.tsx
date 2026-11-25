@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRoute, onNavigate, isOp
                   {user?.full_name || 'Guest Explorer'}
                 </div>
                 <div className="text-[10px] text-[#6F7782] truncate">
-                  {user?.is_demo ? 'Demo Workspace' : user?.email || 'Signed in'}
+                  {user?.email || 'Signed in'}
                 </div>
               </div>
             </div>

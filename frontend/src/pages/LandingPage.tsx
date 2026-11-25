@@ -13,7 +13,6 @@ import {
   Globe
 } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
-import { useAuth } from '../context/AuthContext';
 import { AiOrb } from '../components/common/AiOrb';
 
 interface LandingPageProps {
@@ -22,13 +21,6 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuthModal }) => {
-  const { loginDemo } = useAuth();
-
-  const handleDemoClick = async () => {
-    await loginDemo();
-    onNavigate('/dashboard');
-  };
-
   return (
     <div className="min-h-screen bg-[#F9F9FB] flex flex-col text-[#17191C]">
       <Navbar onNavigate={onNavigate} onOpenAuthModal={onOpenAuthModal} />
@@ -46,6 +38,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
               <span className="truncate">Minimalist AI Workspace for Career Acceleration</span>
             </div>
 
+            {/* Main Heading */}
             <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-light text-[#17191C] tracking-tight leading-[1.15]">
               Move from Career Confusion to{' '}
               <span className="font-normal text-[#193D50] underline decoration-[#C7B5D9]/70 decoration-2 underline-offset-4">
@@ -54,27 +47,108 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
               .
             </h1>
 
-            <p className="mt-5 sm:mt-6 text-sm sm:text-lg text-[#6F7782] leading-relaxed font-normal max-w-2xl mx-auto">
+            {/* AI Core Glowing Ball (Orb) - Placed directly after the heading */}
+            <div className="my-10 sm:my-14 relative flex flex-col items-center justify-center">
+              {/* Ambient Multi-layered Glow Auras */}
+              <div className="absolute w-[280px] h-[280px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-[#C7B5D9]/30 via-[#A8B9D0]/25 to-[#F4D7E6]/25 rounded-full blur-3xl pointer-events-none animate-pulse-soft" />
+              <div className="absolute w-[180px] h-[180px] sm:w-[320px] sm:h-[320px] bg-gradient-to-br from-[#536C8A]/15 to-[#C7B5D9]/20 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col items-center w-full">
+                {/* Top pill above ball */}
+                <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-[#E4E5E9] shadow-soft text-[11px] text-[#6F7782] font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Adaptive Career Intelligence Engine
+                </div>
+
+                {/* Central Glowing AI Ball (Orb) */}
+                <div
+                  className="relative group cursor-pointer"
+                  onClick={() => onOpenAuthModal('signup')}
+                >
+                  <AiOrb size="hero" pulse={true} glow={true} className="transition-transform duration-700 group-hover:scale-105" />
+
+                  {/* Floating subtle metric cards on left and right for desktop only */}
+                  <div className="hidden lg:flex absolute top-1/2 -left-36 xl:-left-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
+                    <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                      <span className="w-2 h-2 rounded-full bg-[#536C8A]" />
+                      <span className="font-medium">Verified Fit</span>
+                      <span className="font-mono text-[11px] text-[#536C8A] bg-[#EAEFF5] px-1.5 py-0.5 rounded">94%</span>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                      <span className="w-2 h-2 rounded-full bg-[#C7B5D9]" />
+                      <span className="font-medium">Single Best Path</span>
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:flex absolute top-1/2 -right-36 xl:-right-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
+                    <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="font-medium">Adaptive Roadmap</span>
+                      <span className="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
+                      <span className="w-2 h-2 rounded-full bg-blue-500" />
+                      <span className="font-medium">4-API Live Stream</span>
+                      <span className="font-mono text-[11px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">70+ Roles</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile / Tablet 2x2 Metric Cards Grid */}
+                <div className="grid grid-cols-2 lg:hidden gap-2 sm:gap-3 mt-5 max-w-sm sm:max-w-md w-full px-2">
+                  <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                    <span className="font-medium">Verified Fit</span>
+                    <span className="font-mono text-[10px] text-[#536C8A] bg-[#EAEFF5] px-1.5 py-0.5 rounded">94%</span>
+                  </div>
+                  <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                    <span className="font-medium">Single Path</span>
+                    <span className="w-2 h-2 rounded-full bg-[#C7B5D9]" />
+                  </div>
+                  <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                    <span className="font-medium">Roadmap</span>
+                    <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
+                  </div>
+                  <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
+                    <span className="font-medium">Live Feed</span>
+                    <span className="font-mono text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">70+ Roles</span>
+                  </div>
+                </div>
+
+                {/* Bottom Interactive Prompt under the Ball */}
+                <div className="mt-5 sm:mt-6 flex flex-col items-center">
+                  <button
+                    onClick={() => onOpenAuthModal('signup')}
+                    className="inline-flex items-center gap-2 text-xs text-[#536C8A] hover:text-[#193D50] font-medium transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#C7B5D9]" />
+                    <span>Click to initialize your EduPath AI Career Plan</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Subtitle Description */}
+            <p className="mt-6 text-sm sm:text-lg text-[#6F7782] leading-relaxed font-normal max-w-2xl mx-auto">
               Multi-stage AI assessments, explainable career matching, adaptive learning roadmaps,
               and live real-time job matching—engineered to verify competence and close skill gaps.
             </p>
 
-            {/* CTAs */}
-            <div className="mt-8 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5 w-full">
+            {/* CTAs (No Try Demo) */}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5 w-full">
               <button
-                onClick={handleDemoClick}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition shadow-soft cursor-pointer"
+                onClick={() => onOpenAuthModal('signup')}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-xs sm:text-sm font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition shadow-soft cursor-pointer"
               >
-                <span>Build My Career Roadmap</span>
+                <span>Get Started Free</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <button
-                onClick={handleDemoClick}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium text-[#193D50] bg-white hover:bg-[#F9F9FB] border border-[#E4E5E9] hover:border-[#C7B5D9]/60 transition shadow-soft cursor-pointer"
+                onClick={() => onOpenAuthModal('signin')}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-xs sm:text-sm font-medium text-[#17191C] bg-white hover:bg-[#F9F9FB] border border-[#E4E5E9] hover:border-[#536C8A]/50 transition shadow-soft cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-[#536C8A]" />
-                <span>Explore Demo Workspace</span>
+                <span>Sign In to Workspace</span>
               </button>
             </div>
 
@@ -92,85 +166,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
                 <Globe className="w-3.5 h-3.5 text-[#536C8A]" />
                 Live 4-API Feed
               </span>
-            </div>
-          </div>
-
-          {/* AI Core Interactive Hero Orb (Ball) Centerpiece */}
-          <div className="mt-12 sm:mt-16 relative flex flex-col items-center justify-center">
-            {/* Ambient Multi-layered Glow Auras */}
-            <div className="absolute w-[280px] h-[280px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-[#C7B5D9]/30 via-[#A8B9D0]/25 to-[#F4D7E6]/25 rounded-full blur-3xl pointer-events-none animate-pulse-soft" />
-            <div className="absolute w-[180px] h-[180px] sm:w-[320px] sm:h-[320px] bg-gradient-to-br from-[#536C8A]/15 to-[#C7B5D9]/20 rounded-full blur-2xl pointer-events-none" />
-
-            {/* Orbiting / Surrounding Floating AI Capability Badges */}
-            <div className="relative z-10 flex flex-col items-center w-full">
-              {/* Top pill above ball */}
-              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-[#E4E5E9] shadow-soft text-[11px] text-[#6F7782] font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Adaptive Career Intelligence Engine
-              </div>
-
-              {/* Central Glowing AI Ball (Orb) */}
-              <div className="relative group cursor-pointer" onClick={handleDemoClick}>
-                <AiOrb size="hero" pulse={true} glow={true} className="transition-transform duration-700 group-hover:scale-105" />
-                
-                {/* Floating subtle metric cards on left and right for desktop only */}
-                <div className="hidden lg:flex absolute top-1/2 -left-36 xl:-left-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
-                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
-                    <span className="w-2 h-2 rounded-full bg-[#536C8A]" />
-                    <span className="font-medium">Verified Fit</span>
-                    <span className="font-mono text-[11px] text-[#536C8A] bg-[#EAEFF5] px-1.5 py-0.5 rounded">94%</span>
-                  </div>
-                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
-                    <span className="w-2 h-2 rounded-full bg-[#C7B5D9]" />
-                    <span className="font-medium">Single Best Path</span>
-                  </div>
-                </div>
-
-                <div className="hidden lg:flex absolute top-1/2 -right-36 xl:-right-44 -translate-y-1/2 flex-col gap-3 pointer-events-none">
-                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="font-medium">Adaptive Roadmap</span>
-                    <span className="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
-                  </div>
-                  <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#E4E5E9] shadow-soft flex items-center gap-2.5 text-xs text-[#17191C]">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    <span className="font-medium">4-API Live Stream</span>
-                    <span className="font-mono text-[11px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">70+ Roles</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile / Tablet 2x2 Metric Cards Grid */}
-              <div className="grid grid-cols-2 lg:hidden gap-2 sm:gap-3 mt-5 max-w-sm sm:max-w-md w-full px-2">
-                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
-                  <span className="font-medium">Verified Fit</span>
-                  <span className="font-mono text-[10px] text-[#536C8A] bg-[#EAEFF5] px-1.5 py-0.5 rounded">94%</span>
-                </div>
-                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
-                  <span className="font-medium">Single Path</span>
-                  <span className="w-2 h-2 rounded-full bg-[#C7B5D9]" />
-                </div>
-                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
-                  <span className="font-medium">Roadmap</span>
-                  <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
-                </div>
-                <div className="bg-white/95 px-3 py-2 rounded-xl border border-[#E4E5E9] shadow-soft flex items-center justify-between text-[11px] sm:text-xs text-[#17191C]">
-                  <span className="font-medium">Live Feed</span>
-                  <span className="font-mono text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">70+ Roles</span>
-                </div>
-              </div>
-
-              {/* Bottom Interactive Prompt under the Ball */}
-              <div className="mt-5 sm:mt-6 flex flex-col items-center">
-                <button
-                  onClick={handleDemoClick}
-                  className="inline-flex items-center gap-2 text-xs text-[#536C8A] hover:text-[#193D50] font-medium transition-colors"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#C7B5D9]" />
-                  <span>Click to interact with EduPath AI Core</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -373,21 +368,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenAuth
             Ready to Accelerate Your Career Trajectory?
           </h2>
           <p className="mt-3 text-slate-300 text-sm max-w-lg mx-auto font-normal">
-            Explore the 1-click guest workspace or create your account to unlock your personalized learning roadmap.
+            Create your account or sign in to unlock your personalized career trajectory, live multi-API matching, and adaptive learning roadmap.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
-              onClick={handleDemoClick}
+              onClick={() => onOpenAuthModal('signup')}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-medium bg-white text-[#193D50] hover:bg-[#F9F9FB] transition shadow-soft cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#536C8A]" />
-              <span>Explore Demo Workspace</span>
+              <span>Get Started Free</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => onOpenAuthModal('signup')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-medium bg-[#536C8A] text-white hover:bg-[#435872] transition cursor-pointer"
+              onClick={() => onOpenAuthModal('signin')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-medium bg-white/10 text-white hover:bg-white/15 border border-white/20 transition cursor-pointer"
             >
-              <span>Get Started Free</span>
+              <span>Sign In to Workspace</span>
             </button>
           </div>
         </div>

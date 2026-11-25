@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, AlertCircle, ArrowRight, UserCheck, KeyRound } from 'lucide-react';
+import { X, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { AiOrb } from './AiOrb';
 
@@ -16,7 +16,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess
 }) => {
-  const { login, register, loginDemo } = useAuth();
+  const { login, register } = useAuth();
   const [isRegister, setIsRegister] = useState(initialMode === 'signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,27 +64,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoClick = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await loginDemo();
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to initialize demo student profile.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFillDemoCreds = () => {
-    setIsRegister(false);
-    setEmail('demo@edupath.ai');
-    setPassword('demo1234');
-    setError(null);
   };
 
   return (
@@ -146,28 +125,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             >
               Create Account
             </button>
-          </div>
-
-          {/* 1-Click Demo Profile Button */}
-          <button
-            type="button"
-            onClick={handleDemoClick}
-            disabled={loading}
-            className="w-full mb-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium bg-gradient-to-r from-[#536C8A]/10 via-[#C7B5D9]/15 to-[#A8B9D0]/10 text-[#193D50] border border-[#C7B5D9]/40 hover:border-[#C7B5D9] transition cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#536C8A]" />
-            <span>1-Click Instant Demo Login (Alex Chen)</span>
-          </button>
-
-          <div className="relative mb-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#E4E5E9]" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-white text-[#6F7782] font-normal">
-                or sign in with email
-              </span>
-            </div>
           </div>
 
           {/* Error Message with Quick Action */}
@@ -240,15 +197,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <label className="block text-[12px] font-medium text-[#17191C]">
                   Password
                 </label>
-                {!isRegister && (
-                  <button
-                    type="button"
-                    onClick={handleFillDemoCreds}
-                    className="text-[11px] text-[#536C8A] hover:underline cursor-pointer"
-                  >
-                    Auto-fill demo credentials
-                  </button>
-                )}
               </div>
               <input
                 type="password"

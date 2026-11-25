@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, Sparkles } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
 import { AiOrb } from '../common/AiOrb';
@@ -65,13 +65,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ currentRoute, onOpenSideba
       </div>
 
       <div className="flex items-center gap-3">
-        {user?.is_demo && (
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-[#C7B5D9]/15 text-[#536C8A] border border-[#C7B5D9]/30">
-            <Sparkles className="w-3 h-3 text-[#536C8A]" />
-            Demo Profile: Alex Chen
-          </span>
-        )}
-
         {/* Readiness Score Pill with Floating Orb Accent */}
         <div
           onClick={() => onNavigate('/dashboard')}
