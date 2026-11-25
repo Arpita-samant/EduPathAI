@@ -172,7 +172,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({ initialSkillFilter
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-xs font-light text-[#6F7782] flex items-center gap-1.5 mr-1">
               <Sparkles className="w-3.5 h-3.5 text-[#536C8A]" />
-              Skill Gaps:
+              Target Skills:
             </span>
             {prioritizedSkills.map((sk) => (
               <button

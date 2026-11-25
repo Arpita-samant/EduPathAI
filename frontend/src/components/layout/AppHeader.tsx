@@ -34,7 +34,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ currentRoute, onOpenSideba
       case '/careers': return { title: 'AI Career Match & Mentor', subtitle: 'Single best-fit career analysis & conversational AI advisor' };
       case '/roadmap': return { title: 'Adaptive Learning Roadmap', subtitle: 'Structured weekly execution plan & capstone milestones' };
       case '/jobs': return { title: 'Live Opportunities Feed', subtitle: 'Real-time multi-API stream from Jobicy, Arbeitnow, Himalayas & Adzuna' };
-      case '/skill-gap': return { title: 'Skill Gap Matrix', subtitle: 'Target role benchmarking, missing capabilities & action plan' };
       case '/resume-ats': return { title: 'AI Resume ATS Analyzer', subtitle: 'Keyword matching, format audits & STAR bullet rewrites' };
       case '/resources': return { title: 'Curated Free Hub', subtitle: 'High-signal courses, documentation & interactive practice' };
       default: return { title: 'EduPath AI Workspace', subtitle: 'Personalized career intelligence' };

@@ -92,9 +92,6 @@ export const api = {
   },
   getJobDetail: (id: string) => request<any>(`/jobs/${id}`),
 
-  // Skill Gap
-  getSkillGap: (targetIdentifier: string = 'default') => request<any>(`/skill-gap/${encodeURIComponent(targetIdentifier)}`),
-
   // ATS
   analyzeAts: (formData: FormData) => request<any>('/ats/analyze', { method: 'POST', body: formData }),
   getLatestAts: () => request<any>('/ats/latest'),

@@ -10,7 +10,6 @@ import { CareerRecommendationsPage } from './pages/CareerRecommendationsPage';
 import { AssessmentPage } from './pages/AssessmentPage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { JobsPage } from './pages/JobsPage';
-import { SkillGapPage } from './pages/SkillGapPage';
 import { AtsResumePage } from './pages/AtsResumePage';
 import { ResourcesPage } from './pages/ResourcesPage';
 
@@ -20,7 +19,6 @@ function AppContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [selectedAssessmentDomain, setSelectedAssessmentDomain] = useState<string>('Full-Stack Software Engineering');
-  const [selectedRoleForGap, setSelectedRoleForGap] = useState<string>('default');
   const [resourceSkillFilter, setResourceSkillFilter] = useState<string>('');
 
   // Handle URL hash or path sync if desired
@@ -96,20 +94,7 @@ function AppContent() {
       case '/roadmap':
         return <RoadmapPage onNavigate={navigate} />;
       case '/jobs':
-        return (
-          <JobsPage
-            onNavigate={navigate}
-            onSelectRoleForGap={(roleId) => setSelectedRoleForGap(roleId)}
-          />
-        );
-      case '/skill-gap':
-        return (
-          <SkillGapPage
-            onNavigate={navigate}
-            targetRoleIdentifier={selectedRoleForGap}
-            onFilterResourceBySkill={(sk) => setResourceSkillFilter(sk)}
-          />
-        );
+        return <JobsPage onNavigate={navigate} />;
       case '/resume-ats':
         return <AtsResumePage />;
       case '/resources':

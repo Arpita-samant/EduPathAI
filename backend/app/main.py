@@ -11,7 +11,6 @@ from app.routers import (
     assessment_router,
     roadmap_router,
     jobs_router,
-    skill_gap_router,
     ats_router,
     resources_router,
     dashboard_router
@@ -62,7 +61,6 @@ app.include_router(careers_router.router, prefix=settings.API_V1_STR)
 app.include_router(assessment_router.router, prefix=settings.API_V1_STR)
 app.include_router(roadmap_router.router, prefix=settings.API_V1_STR)
 app.include_router(jobs_router.router, prefix=settings.API_V1_STR)
-app.include_router(skill_gap_router.router, prefix=settings.API_V1_STR)
 app.include_router(ats_router.router, prefix=settings.API_V1_STR)
 app.include_router(resources_router.router, prefix=settings.API_V1_STR)
 app.include_router(dashboard_router.router, prefix=settings.API_V1_STR)

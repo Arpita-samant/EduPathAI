@@ -10,7 +10,6 @@ import {
   MapPin,
   DollarSign,
   FileText,
-  GitPullRequest,
   X,
   Globe,
   Radio,
@@ -23,10 +22,9 @@ import { AiOrb } from '../components/common/AiOrb';
 
 interface JobsPageProps {
   onNavigate: (route: string) => void;
-  onSelectRoleForGap?: (roleNameOrId: string) => void;
 }
 
-export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForGap }) => {
+export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate }) => {
   const [jobs, setJobs] = useState<JobMatchItem[]>([]);
   const [activeSources, setActiveSources] = useState<JobSourceStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,14 +63,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
     fetchJobs();
   };
 
-  const handleRunSkillGap = (job: JobMatchItem) => {
-    if (onSelectRoleForGap) {
-      onSelectRoleForGap(job.id);
-    }
-    onNavigate('/skill-gap');
-  };
-
-  const handleRunAts = (job: JobMatchItem) => {
+  const handleRunAts = (_job: JobMatchItem) => {
     onNavigate('/resume-ats');
   };
 
@@ -377,7 +368,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                   onClick={() => setSelectedJob(job)}
                   className="flex-1 py-2 px-3 text-xs font-normal rounded-xl bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition text-center cursor-pointer truncate"
                 >
-                  View Details & Gaps
+                  View Details
                 </button>
                 {job.apply_url && (
                   <a
@@ -390,13 +381,6 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
-                <button
-                  onClick={() => handleRunSkillGap(job)}
-                  title="Run Skill Gap Analysis"
-                  className="p-2 rounded-xl border border-[#E4E5E9] hover:bg-[#F9F9FB] text-[#6F7782] transition cursor-pointer shrink-0"
-                >
-                  <GitPullRequest className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
           ))}
@@ -529,23 +513,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onSelectRoleForG
                   </a>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    onClick={() => handleRunSkillGap(selectedJob)}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-normal bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition cursor-pointer"
-                  >
-                    <GitPullRequest className="w-3.5 h-3.5 text-[#536C8A]" />
-                    <span>Skill Gap Analysis</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleRunAts(selectedJob)}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-normal bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition cursor-pointer"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-[#536C8A]" />
-                    <span>ATS Resume Audit</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleRunAts(selectedJob)}
+                  className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-normal bg-[#F9F9FB] hover:bg-white border border-[#E4E5E9] text-[#17191C] transition cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#536C8A]" />
+                  <span>ATS Resume Audit</span>
+                </button>
               </div>
             </div>
           </div>

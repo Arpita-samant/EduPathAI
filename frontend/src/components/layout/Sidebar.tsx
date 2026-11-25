@@ -6,7 +6,6 @@ import {
   ClipboardCheck,
   MapPin,
   Briefcase,
-  GitPullRequest,
   FileText,
   BookOpen,
   LogOut,
@@ -45,7 +44,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRoute, onNavigate, isOp
       label: 'Real-Time Industry',
       items: [
         { label: 'Live Opportunities', icon: Briefcase, route: '/jobs' },
-        { label: 'Skill Gap Matrix', icon: GitPullRequest, route: '/skill-gap' },
         { label: 'Resume ATS Scanner', icon: FileText, route: '/resume-ats' },
         { label: 'Curated Hub', icon: BookOpen, route: '/resources' },
       ]
